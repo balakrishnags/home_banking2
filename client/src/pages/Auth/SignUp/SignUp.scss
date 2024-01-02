@@ -1,0 +1,57 @@
+@import "../../../style/theme.style";
+
+.form_width {
+  max-width: 800px;
+  margin: 30px auto 30px auto;
+  background-color: $card_background;
+  padding: 30px;
+  border-radius: 6px;
+
+  .form-control {
+    border: 0 !important;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .pri-term {
+    background-color: transparent;
+    color: $default_white;
+    text-decoration: underline;
+    border: none;
+  }
+
+  .btn_submit {
+    background-color: $button_color;
+    color: $default_white;
+    padding: 10px 30px;
+    border: 0;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .login_link {
+    color: $default_white;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  @media (max-width: 767px) {
+    margin: 30px 15px;
+    padding: 30px 20px;
+    .btn_submit {
+      padding: 10px 20px;
+    }
+  }
+}
+.small {
+  position: absolute;
+}
+.eye_icon {
+  position: absolute;
+  top: 40px;
+  right: 15px;
+  cursor: pointer;
+}
+.error_font {
+  font-size: 14px;
+}

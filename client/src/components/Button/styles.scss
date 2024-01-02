@@ -1,0 +1,14 @@
+@import "../../style/theme.style";
+
+.buttonstyles {
+  width: 100%;
+  background-color: $button_color;
+  height: 50px;
+  outline: none;
+  color: $default_white;
+  border: 1px solid $button_color;
+  &:hover {
+    background-color: $button_color;
+    color: $default_white;
+  }
+}

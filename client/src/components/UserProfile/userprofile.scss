@@ -1,0 +1,35 @@
+@import "../../style/theme.style";
+
+.userprofile_div {
+  max-width: 800px;
+  margin: 50px auto 30px auto;
+  background-color: $card_background;
+  padding: 30px 30px;
+  .profile_tab.nav-tabs {
+    border-color: #34292980;
+    .nav-link {
+      color: #fff !important;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .nav-link:hover {
+      border-color: $card_background !important;
+      border-bottom: 1px solid #34292980 !important;
+    }
+    .nav-link.active {
+      border-color: $card_background !important;
+      border-bottom: 1px solid #fff !important;
+      background-color: transparent !important;
+    }
+  }
+  @media (max-width: 550px) {
+    padding: 20px 15px;
+    .profile_tab.nav-tabs .nav-link {
+      padding: 10px;
+    }
+  }
+}
+.w-800 {
+  max-width: 800px;
+  margin: 50px auto 0 auto;
+}

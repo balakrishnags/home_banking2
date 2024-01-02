@@ -1,0 +1,84 @@
+@import "../../style/theme.style";
+
+.header_style {
+  background-color: $card_background;
+  box-shadow: 0px 0px 4px $default_black;
+  padding: 12px 0 !important;
+  z-index: 1030;
+  .hamber_div {
+    display: flex;
+    align-items: center;
+    img {
+      width: 35px;
+    }
+  }
+  .db_logo {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .logostyle {
+    width: 50px;
+    background: #fff;
+    border-radius: 6px;
+  }
+  .prof_link {
+    // padding: 5px 10px;
+    text-decoration: none;
+    color: #000000;
+    margin: 5px 10px;
+    cursor: pointer;
+    width: fit-content;
+  }
+  .user_logo {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+    cursor: pointer;
+  }
+}
+
+// .dprdwn {
+//   display: flex;
+//   align-items: center;
+//   .dropdown-menu {
+//     right: 0 !important;
+//     left: auto !important;
+//   }
+//   .dropdown-toggle {
+//     padding: 0 !important;
+//     height: 35px;
+//     width: 35px;
+//     margin: 0 0 0 12px;
+//   }
+//   .dropdown-toggle::after {
+//     display: inline-block;
+//     margin-left: 0;
+//     vertical-align: 0;
+//     content: "";
+//     border-top: 0;
+//     border-right: 0;
+//     border-bottom: 0;
+//     border-left: 0;
+//     width: 100%;
+//     height: 100%;
+//     background-image: url(../../assets/user.png);
+//     border-radius: 50%;
+//     background-repeat: no-repeat;
+//     background-size: contain;
+//   }
+//   @media (max-width: 767px) {
+//     .dropdown-toggle {
+//       margin: 0 12px 0 0;
+//     }
+//   }
+// }
+
+.dprdwn {
+  position: absolute;
+  right: 10px;
+  background: #fff;
+  padding: 6px 4px;
+  top: 100%;
+  border-radius: 4px;
+  min-width: 120px;
+}

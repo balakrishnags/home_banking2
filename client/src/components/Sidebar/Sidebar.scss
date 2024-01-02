@@ -1,0 +1,106 @@
+@import "./../../style/theme.style";
+
+.sidebar {
+  background-color: $card_background;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: auto;
+  width: 16.66666667%;
+  z-index: 1029;
+  // overflow-y: scroll;
+  padding: 90px 0 20px 0;
+
+  .sidebar_options {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    .sidebar_link {
+      font-size: 16px;
+      color: $default_white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 5px 15px;
+      display: block;
+    }
+
+    .sidebar_link.active {
+      background-color: #00ffff96;
+      color: #0b2fd3;
+    }
+
+    .accordion-item {
+      background-color: transparent !important;
+      border: 0 !important;
+    }
+
+    .accordion-button {
+      background-color: transparent !important;
+      box-shadow: none !important;
+      font-size: 16px;
+      color: $default_white;
+      font-weight: 600;
+      padding: 5px 15px !important;
+    }
+
+    .accordion-button:after {
+      width: 15px !important;
+      height: 15px !important;
+      color: #fff !important;
+      background-image: url("../../assets/dropdown.png") !important;
+      background-size: contain !important;
+      transform: rotate(90deg);
+    }
+
+    .collapsed.accordion-button:after {
+      transform: rotate(0deg);
+    }
+
+    .accordion-body {
+      padding: 1px 0 !important;
+      background-color: $default_white;
+      margin: 5px 15px;
+      border-radius: 6px;
+
+      .sidebar_link {
+        font-size: 15px;
+        padding: 8px 5px 8px 10px !important;
+        color: #575151;
+        line-height: 1.2;
+      }
+
+      .sidebar_link.active {
+        color: #0b2fd3;
+        border-radius: 6px;
+      }
+    }
+  }
+
+  @media (max-width: 767px) {
+    left: 0%;
+    width: 100%;
+    transition: all 0.2s;
+  }
+}
+
+.sidebar.close {
+  @media (max-width: 767px) {
+    position: absolute;
+    width: 100%;
+    left: -100%;
+  }
+}
+
+.accordion-button {
+  background-color: #97d8e6 !important;
+}
+
+.sidebarTest {
+  max-width: 240px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.react-datepicker-popper {
+  z-index: 999 !important;
+}

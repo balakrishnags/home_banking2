@@ -1,0 +1,107 @@
+@import "../../../style/theme.style";
+
+.formsignin_width {
+  max-width: 500px;
+  margin: 30px auto 30px auto;
+  background-color: $card_background;
+  padding: 30px;
+  border-radius: 6px;
+
+  .form-control {
+    border: 0 !important;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .btn_submit {
+    background-color: $button_color !important;
+    color: $default_white;
+    width: 100%;
+    padding: 10px 0;
+    margin-top: 30px;
+    border: 0;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .login_link {
+    color: $button_color;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .forgot_link {
+    color: $default_white;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  @media (max-width: 767px) {
+    max-width: inherit;
+    margin: 30px 20px;
+  }
+}
+.header_color {
+  color: $header_color;
+}
+.font_color {
+  color: $default_white !important;
+}
+.border_bot {
+  border-bottom: 1px solid #fff;
+  margin-bottom: 16px;
+}
+.active_admin {
+  font-weight: 700;
+  border: 0;
+  padding: 0 12px;
+  border-bottom: 1px solid #fff;
+}
+.circle {
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  background-color: #ff9b9b;
+  margin: 0 auto;
+  position: relative;
+}
+.smallCircle {
+  width: 50px;
+  height: 50px;
+  background-color: #fff;
+  border-radius: 50%;
+}
+.left {
+  position: absolute;
+  top: 30%;
+  left: 10%;
+}
+.right {
+  position: absolute;
+  top: 30%;
+  right: 10%;
+}
+.blackcircle {
+  width: 20px;
+  height: 20px;
+  background-color: #000;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transition: all 0.5s;
+  // transform: translate(-50%, -50%);
+}
+.blockBox {
+  width: 50px;
+  height: 50px;
+  background-color: green;
+}
+.mouth {
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, 60%);
+}

@@ -1,0 +1,12 @@
+@import "../../style/theme.style";
+
+.snackbardiv {
+  z-index: 9999;
+}
+.snack_style {
+  color: $default_white !important;
+  position: fixed;
+  width: 300px !important;
+  top: 10%;
+  right: 5%;
+}

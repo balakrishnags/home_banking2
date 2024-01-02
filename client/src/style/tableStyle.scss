@@ -1,0 +1,189 @@
+@import "../style/theme.style";
+
+table {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table_scroll {
+  overflow-x: scroll;
+}
+
+table td,
+table th {
+  border: 1px solid $default_white;
+  padding: 8px;
+}
+
+// table tr:nth-child(even){background-color: #f2f2f2;}
+
+table tr:hover {
+  // background-color: #ddd;
+  background-color: transparent;
+  // cursor: pointer;
+}
+
+table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  color: $default_white;
+  background-color: $card_background;
+  border-color: $default_white;
+  cursor: default;
+}
+
+table td {
+  color: $default_white;
+  background-color: $card_background;
+  cursor: default;
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  width: 100%;
+  z-index: 2;
+  color: $default_black;
+  position: relative;
+  background: transparent;
+  border-bottom: 1px solid $default_black;
+}
+
+.selectTagTableOrders {
+  border: 1px solid $default_white !important;
+  width: 60px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
+  text-align: center !important;
+  margin-top: 10px;
+}
+
+.pageNumber {
+  background-color: $button_color;
+  padding: 15px 25px;
+  border-radius: 5px;
+  text-align: center;
+  color: $default_white;
+  margin: 0px;
+}
+
+.actionBtn {
+  height: 30px;
+  // width: 70px;
+  background: $button_color;
+  color: #ffffff;
+  border: 1px solid $button_color;
+}
+
+.actionBtn:disabled {
+  background: $default_white;
+  color: $default_black;
+  border: 1px solid $default_black;
+  opacity: 0.5;
+}
+
+.skipToBtn {
+  border: none;
+  background: none;
+  color: $button_color;
+  font-weight: 900;
+}
+
+.skipToBtn:disabled {
+  background: none;
+  color: $default_black;
+  opacity: 0.5;
+}
+
+.searchDiv {
+  width: 20%;
+  border-bottom: 2px solid $default_white;
+}
+
+.searchIcon {
+  position: absolute;
+  height: 15px;
+  width: 15px;
+  right: 0px;
+  bottom: 8px;
+}
+
+.deleteIcon {
+  position: absolute;
+  height: 15px;
+  width: 15px;
+  right: 20px;
+  bottom: 8px;
+  cursor: pointer;
+}
+
+.editIcon {
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+}
+
+.modalBody {
+  .modal_p_tag {
+    font-weight: 600;
+  }
+
+  ._reason_text_area {
+    height: 70px;
+    outline: none;
+  }
+}
+
+.sick_leave_inp_div {
+  width: 50%;
+}
+
+.update_emp_dependants_inp_div {
+  width: 100%;
+}
+
+.exp_logo {
+  height: 20px;
+  width: 20px;
+}
+
+.tablenav {
+  margin-top: 16px;
+  .pageNumber {
+    background-color: $card_background;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-align: center;
+    color: $default_white;
+    margin: 0px;
+  }
+}
+
+.update_style {
+  .select__dropdown-indicator {
+    color: #00000082 !important;
+  }
+  .w-200 {
+    width: 200px !important;
+  }
+  .w-150 {
+    width: 150px !important;
+  }
+}
+.select__dropdown-indicator {
+  color: #000 !important;
+}
+.select--is-disabled {
+  opacity: 0.7;
+}
+.check_error {
+  line-height: 1.2;
+  font-size: 12px;
+  margin: 5px 0 0 0;
+  color: #ed4848;
+}
+.word_wrap {
+  word-break: break-word;
+}
