@@ -6,7 +6,8 @@ import { RouteStrings } from "../../utils/common";
 import { configUrl, envType } from "../../apis/api.config";
 import { PostRequestHook, getRequest } from "../../apis/Services";
 import './Dashboard.scss'
-import { setEnvData, setProfileDetail, setSnackbar } from "../../store/reducers/ui.reducer";
+import { setBalance, setEnvData, setProfileDetail, setSnackbar } from "../../store/reducers/ui.reducer";
+import { ENVDATA } from "../../Conflict/Conflct";
 
 const Dashboard = () => {
   const dispatch = useDispatch()
@@ -15,14 +16,15 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (isAuth) {
-      getEnvData()
+      // getEnvData()
       getProfileDetails()
+      getAvailableBalance()
     }
   }, [isAuth])
 
   useEffect(() => {
     if (userInfo?.userId) {
-      const eventSource = new EventSource(`http://localhost:8081/sse/updateUserDetailsEvent`);
+      const eventSource = new EventSource(`${ENVDATA.baseUrl}/sse/updateUserDetailsEvent`);
 
       eventSource.onmessage = (event) => {
         let data = JSON.parse(event.data)
@@ -44,7 +46,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    const eventSource = new EventSource(`http://localhost:8081/sse/updatePasswordEvent`);
+    const eventSource = new EventSource(`${ENVDATA.baseUrl}/sse/updatePasswordEvent`);
     eventSource.onmessage = (event) => {
 
       let _data = JSON.parse(event.data)
@@ -63,13 +65,18 @@ const Dashboard = () => {
     };
   }, []);
 
-  const getEnvData = async () => {
-    let response = await getRequest(`${configUrl.getEnvData}${envType}`)
-    dispatch(setEnvData(response?.data?.data || null))
-  }
+  // const getEnvData = async () => {
+  //   let response = await getRequest(`${configUrl.getEnvData}${envType}`)
+  //   dispatch(setEnvData(response?.data?.data || null))
+  // }
   const getProfileDetails = async () => {
     var response = await getRequest(`${configUrl.getDetailsById}${userInfo.userId}`)
     dispatch(setProfileDetail(response?.data?.data || null))
+  }
+
+  const getAvailableBalance = async () => {
+    var response = await getRequest(`${configUrl.getAvailableBalance}${userInfo.userId}`)
+    dispatch(setBalance(response?.data?.data || {}))
   }
 
   return isAuth ? (

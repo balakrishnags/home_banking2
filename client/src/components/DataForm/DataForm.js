@@ -9,11 +9,7 @@ import { configUrl } from '../../apis/api.config';
 import { useEffect } from 'react';
 
 export const DataForm = (props) => {
-    const { formData, type, snackBarContent, refreshtable, setCreateData, isUpdate } = props
-    // console.log("🚀 ~ file: DataForm.js:13 ~ DataForm ~ formData:", formData)
-
-    const { userInfo } = useSelector(state => state.UIStore)
-    let userId = userInfo.userId || null
+    const { formData, type, snackBarContent, refreshtable, setCreateData, isUpdate, userId } = props
 
     const { putRequest, postRequest } = PostRequestHook()
 
@@ -62,7 +58,6 @@ export const DataForm = (props) => {
 
     const handleCreditDebitData = async (api, data) => {
         let response = isUpdate ? await putRequest(api, data) : await postRequest(api, data)
-        console.log("🚀 ~ file: ChangePassword.js:37 ~ onSubmit: ~ response:", response)
         if (response?.status === 201 || response?.status === 200) {
             snackBarContent(true, response?.data?.message)
             refreshtable()
@@ -83,7 +78,7 @@ export const DataForm = (props) => {
                                 type="number" name="creditAmount" lableClass="font_color"
                                 handleChange={formik.handleChange} handleBlur={formik.handleBlur}
                                 value={formik.values.creditAmount}
-                                placeholder="Enter name"
+                                placeholder="Enter amount"
                                 formikValidation={formik.touched.creditAmount && formik.errors.creditAmount ?
                                     <small className='text-danger position-absolute'>{formik.errors.creditAmount}</small>
                                     : null}

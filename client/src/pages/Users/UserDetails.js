@@ -10,7 +10,7 @@ import { ModalComponent } from '../../components/modal/ModalComponent';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { TotalChart } from '../Dashboard/TotalChart';
-import { SampleCreditList } from '../Credit/SampleCreditList';
+import { CommonCreditScreen } from '../Credit/CommonCreditScreen';
 
 export const UserDetails = (props) => {
     const { snackBarContent, userDetail, setCreateUser, refreshtable, setViewDetails, userId, setEditUser, isChange, isUserView, setUserView } = props
@@ -180,7 +180,9 @@ export const UserDetails = (props) => {
                     </div>
                 }
             </div>}
-            {isUserView && <SampleCreditList userDetail={userDetail} setUserView={setUserView} type={isUserType} />}
+            {/* {isUserView && <SampleCreditList userDetail={userDetail} setUserView={setUserView} type={isUserType} />} */}
+            {isUserView && <CommonCreditScreen userDetail={userDetail} setCreateUser={setCreateUser}
+                setUserView={setUserView} type={isUserType} isAdmin={true} />}
 
             {/*  user delete modal */}
             <ModalComponent

@@ -9,6 +9,7 @@ import { DataDetails } from '../../components/DataForm/DataDetails'
 // import { PaymentDetails } from './PaymentDetails'
 import { setSnackbar } from '../../store/reducers/ui.reducer'
 import { PaymentDetails } from '../Lending/PaymentDetails'
+import { CommonCreditScreen } from '../Credit/CommonCreditScreen'
 
 export const Borrow = () => {
     const { getRequest } = PostRequestHook()
@@ -113,7 +114,7 @@ export const Borrow = () => {
 
     return (
         <>
-            <div className='my-5 mx-md-4 mx-md-5'>
+            {/* <div className='my-5 mx-md-4 mx-md-5'>
                 <div className="d-md-flex justify-content-between">
                     <h3>{isCreateCredit ? (isDetails ? "Borrow details" : (isEditCredit ? "Update Borrow Details" : "Add New Borrow Data")) : "Borrow List"}</h3>
                     <button type="button" className='btn btn-primary' onClick={() => {
@@ -132,7 +133,9 @@ export const Borrow = () => {
                         setCreateData={setCreateCredit} isUpdate={isEditCredit} />}
                 </> :
                     <CommonTable propColumns={columns} propData={creditList} />}
-            </div>
+            </div> */}
+            <CommonCreditScreen userDetail={{ userId }} setUserView={() => { }} type={"borrow"}
+                isAdmin={false} />
         </>
     )
 }

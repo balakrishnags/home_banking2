@@ -33,9 +33,11 @@ const ERROR_MESSAGES = Object.freeze({
         GENDERERROR: "Gendre should be male or female or Other",
         VALIDPHONE: "Enter valid Phone Number",
         EMAILEXISTS: "email already exists",
-        MAILSENTERROR: "Email not sent, mail sending error",
+        MAILSENTERROR: "User registerd, Email not sent, mail sending error",
+        RESETPASSMAILSENTERROR: "Email not sent, mail sending error",
         VALIDEMAIL: "Please enter valid email",
         NEWANDCONFIRM: "New password and Confirm password should be same",
+        INVALIDCURRENTPASSWORD: "Old password is not valid",
         RESETTOKENEXPIRED: "Reset Token expired",
         INVALIDCURRENTPASS: "Invalid Current Password"
     }

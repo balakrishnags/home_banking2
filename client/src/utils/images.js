@@ -15,6 +15,7 @@ import PaymentLogo from "../assets/paymenticon.png"
 import logo from "../assets/home_banking_logo.jpg"
 import bigsmile from "../assets/bigsmile.svg"
 import smile from "../assets/smile.svg"
+import backarrow from "../assets/back_arrow.png"
 
 export const Images = {
   logo,
@@ -30,5 +31,5 @@ export const Images = {
   hide_icon,
   view_iconBlack, history_icon,
   PaymentLogo,
-  editLogoBlack, bigsmile, smile
+  editLogoBlack, bigsmile, smile, backarrow
 };

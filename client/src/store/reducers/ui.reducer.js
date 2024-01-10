@@ -20,6 +20,8 @@ export const uiReducer = createSlice({
     snackbar: { isOpen: false, message: "", isSuccess: false },
     envData: null,
     profileDetail: null,
+    balance: null,
+    totalUsers: null
   },
   reducers: {
     setIsAuth: (state, action) => {
@@ -57,12 +59,16 @@ export const uiReducer = createSlice({
       state.userInfo = null
       state.access_token = null
       state.isExpired = false
+    },
+    setBalance: (state, action) => {
+      state.balance = action.payload?.available_balance
+      state.totalUsers = action.payload?.totalUsers
     }
   },
 });
 
 // Action creators are generated for each case reducer function
 export const { setIsAuth, setLoader, setExpired, setEnvData, setProfileDetail,
-  setViewSidebar, resetAuth, setAccessToken, setScreenWidth, setSnackbar } = uiReducer.actions;
+  setViewSidebar, resetAuth, setAccessToken, setScreenWidth, setSnackbar, setBalance } = uiReducer.actions;
 
 export default uiReducer.reducer;

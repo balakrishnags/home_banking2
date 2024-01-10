@@ -8,7 +8,7 @@ const usersendMail = async (to, subject, text, html) => {
             service: 'gmail',
             auth: {
                 user: 'balakrishna.g@dollarbirdinc.com',
-                pass: 'syba buor xrsb aqdc',
+                pass: 'mgbl pfpu uvmj aktv',
             },
         });
 

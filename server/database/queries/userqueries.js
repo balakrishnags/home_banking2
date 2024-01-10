@@ -1,4 +1,6 @@
 const userQueries = {
+    // checking the user and userRole
+    userRoleQuery: 'SELECT userRole FROM users WHERE email=? AND status=1',
     // user is active or deleted Query
     isUser: 'SELECT status from users WHERE userId=? and status=1',
     // credit data insert query
@@ -59,7 +61,7 @@ const userQueries = {
     // get lendingAmount from lendid query
     getLendingAmountQuery: 'SELECT lendingAmount FROM lendigdata WHERE userID=? AND lendId=? AND status=1',
     // get borrowAmount from borrowid query
-    getBorrowAmountQuery: 'SELECT borrowAmount FROM borrowingdata WHERE userID=? AND borrowid=? AND status=1',
+    getBorrowAmountQuery: 'SELECT borrowAmount FROM borrowingdata WHERE userID=? AND borrowId=? AND status=1',
     // lending total Payment Query
     lendingTotalPaymentQuery: `SELECT SUM(paymentAmount) AS totalPayment FROM paymenthistory WHERE userId = ? AND lendId = ? AND status=1`,
     // borrow total Payment Query
@@ -115,12 +117,42 @@ const userQueries = {
 
     // month data query
     // credit chart
-    monthCreditChartQuery: `select monthname(creditDate) as month, SUM(creditAmount) as totalAmount from creditdata c 
+    monthCreditChartQuery: `select monthname(creditDate) as month, SUM(creditAmount) as totalAmount from creditdata 
     where userId=? and year(creditDate)=? AND status=1 group by monthname(creditDate) order by month ASC `,
     monthDebitChartQuery: `select monthname(debitDate) as month, SUM(debitAmount) as totalAmount from debitdata 
     where userId = ? AND year(debitDate)=? AND status=1 group by monthname(debitDate) order by month ASC`,
+    dayCreditChartQuery: `SELECT DAY(creditDate) as day, SUM(creditAmount) as totalAmount
+                            FROM
+                               home_banking.creditdata
+                            WHERE
+                                userId = ? AND  YEAR(creditDate) = ? AND  MONTH(creditDate) = ? AND status = 1
+                            GROUP BY
+                               YEAR(creditDate), MONTH(creditDate), DAY(creditDate)
+                            ORDER BY
+                                day asc`,
+    dayDebitChartQuery: `SELECT DAY(debitDate) as day, SUM(debitAmount) as totalAmount
+                            FROM
+                               home_banking.debitdata
+                            WHERE
+                                userId = ? AND  YEAR(debitDate) = ? AND  MONTH(debitDate) = ? AND status = 1
+                            GROUP BY
+                               YEAR(debitDate), MONTH(debitDate), DAY(debitDate)
+                            ORDER BY
+                                day asc`,
     monthLendingChartQuery: `select monthname(lendingDate) as month, SUM(lendingAmount) as totalAmount from lendigdata 
     where userId = ? AND year(lendingDate)=? AND status=1 group by monthname(lendingDate) order by month ASC`,
+
+    // to get the balance
+    balanceQuery: `select SUM(creditAmount) - SUM(debitAmount) AS available_balance
+        FROM (
+            SELECT  IFNULL(creditAmount, 0) AS creditAmount, 0 AS debitAmount
+            FROM home_banking.creditdata
+            WHERE userId = ?
+            UNION ALL
+            SELECT 0 AS creditAmount, IFNULL(debitAmount, 0) AS debitAmount
+            FROM home_banking.debitdata
+            WHERE userId = ?
+        ) AS transactions`
 
 }
 

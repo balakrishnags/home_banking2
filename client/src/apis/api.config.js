@@ -37,6 +37,7 @@ export const configUrl = {
 
     //dashboard
     getChartData: "/chartdata/",
+    getAvailableBalance: "/userbalance/",
 
     // envdata
     getEnvData: '/envdata/list/',

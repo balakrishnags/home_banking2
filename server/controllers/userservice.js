@@ -1,6 +1,7 @@
+const mySQLInstance = require("../database/classDatabaseConnection")
 const db = require("../database/database")
 const userQueries = require("../database/queries/userqueries")
-const { decryptData, encryptData, returnData, presenttimestamp } = require("../utils/common")
+const { decryptData, encryptData, returnData, presenttimestamp, serverErrorMsg } = require("../utils/common")
 const ERROR_MESSAGES = require("../utils/constants/messages")
 
 // role create Api
@@ -590,7 +591,7 @@ module.exports.updatePaymentDetails = async (req, res) => {
                                 return returnData(res, 400, `Provide valid ${type === "lending" ? "lending" : "borrow"} id related to user`)
                                 // return res.status(400).json({ status: 400, error: `Provide valid ${type === "lending" ? "lending" : "borrow"} id related to user` });
                             } else {
-                                const lendingAmount = result[0].lendingAmount;
+                                const lendingAmount = type === "lending" ? result[0].lendingAmount : result[0].borrowAmount;
                                 const checkPayId = type === "lending" ? userQueries.checkLendingPaymentQuery : userQueries.checkBorrowPaymentQuery
                                 // const checkTotalPaymentQuery = `SELECT SUM(paymentAmount) AS totalPayment FROM paymenthistory WHERE userId = ? AND ${type === "lending" ? "lendId" : "borrowId"} = ? AND payId<>? AND status=1`;
                                 const checkTotalPaymentQuery = type === "lending" ? userQueries.checkLendingTotalAmountQuery : userQueries.checkBorrowTotalAmountQuery
@@ -818,47 +819,41 @@ module.exports.getChartdata = async (req, res) => {
     try {
         const { userId, monthoryear, date } = req.params
         let year = new Date(date).getFullYear()
-        let month = new Date(date)
-        month = month.toLocaleDateString("default", { month: "long" })
-
-
-        // const userCountSql = 'SELECT COUNT(userId) AS totalUsers FROM users WHERE status=1'
-        const userCountSql = userQueries.totalUsersQuery
+        let _month = new Date(date).getMonth() + 1
+        let month = (new Date(date)).toLocaleDateString("default", { month: "long" })
 
         const getChart = (sql, values) => {
             db.query(sql, values, async (err, result) => {
                 if (err) {
-                    // console.log("🚀 ~ file: userservice.js:1462 ~ db.query ~ err:", err)
+                    console.log("🚀 ~ file: userservice.js:1462 ~ db.query ~ err:", err)
                     return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
                     // return res.status(500).json({ status: 500, error: `server error` })
                 } else {
-                    // console.log("🚀 ~ file: userservice.js:1463 ~ db.query ~ result:", result)
-                    let totalCredit = 0;
-                    let totaldebit = 0;
-                    if (monthoryear === "year") {
-                        let _totalCredit = result[0].filter(item => item.year === year)
-                        let _totaldebit = result[1].filter(item => item.year === year)
-                        totalCredit = _totalCredit[0]?.totalAmount || 0
-                        totaldebit = _totaldebit[0]?.totalAmount || 0
-                    } else if (monthoryear === "month") {
-                        let _totalCredit = result[0].filter(item => item.month === month)
-                        let _totaldebit = result[1].filter(item => item.month === month)
-                        totalCredit = _totalCredit[0]?.totalAmount || 0
-                        totaldebit = _totaldebit[0]?.totalAmount || 0
-                    }
-                    // return res.status(200).json({
-                    //     status: 200, message: "Data found",
-                    //     data: {
-                    //         creditData: result[0], debitData: result[1], lendingData: result[3],
-                    //         totalUsers: result[2][0].totalUsers,
-                    //         totalCredit: totalCredit, totalDebit: totaldebit
-                    //     }
-                    // })
+                    console.log("🚀 ~ file: userservice.js:1463 ~ db.query ~ result:", result)
+                    // let totalCredit = 0;
+                    // let totaldebit = 0;
+                    // if (monthoryear === "year") {
+                    //     let _totalCredit = result[0].filter(item => item.year === year)
+                    //     let _totaldebit = result[1].filter(item => item.year === year)
+                    //     totalCredit = _totalCredit[0]?.totalAmount || 0
+                    //     totaldebit = _totaldebit[0]?.totalAmount || 0
+
+                    // } else if (monthoryear === "month") {
+                    //     let _totalCredit = result[0].filter(item => item.month === month)
+                    //     let _totaldebit = result[1].filter(item => item.month === month)
+                    //     totalCredit = _totalCredit[0]?.totalAmount || 0
+                    //     totaldebit = _totaldebit[0]?.totalAmount || 0
+                    // }
+                    let totalCredit = result[0].reduce((sum, entry) => sum + entry.totalAmount, 0)
+                    let totaldebit = result[1].reduce((sum, entry) => sum + entry.totalAmount, 0)
                     let data = {
-                        creditData: result[0], debitData: result[1], lendingData: result[3],
-                        totalUsers: result[2][0].totalUsers,
+                        // creditData: result[0], debitData: result[1], lendingData: result[2],
+                        // totalUsers: result[2][0].totalUsers,
+                        // totalCredit: totalCredit, totalDebit: totaldebit
+                        creditData: result[0], debitData: result[1],
                         totalCredit: totalCredit, totalDebit: totaldebit
                     }
+                    // console.log("🚀 ~ db.query ~ data:", data)
                     return returnData(res, 200, ERROR_MESSAGES.SUCCESS.DATAFOUND, data)
 
                 }
@@ -866,23 +861,11 @@ module.exports.getChartdata = async (req, res) => {
         }
 
         if (monthoryear === "year") {
-            //         const creditsql = `select year(creditDate) as year, SUM(creditAmount) as totalAmount from creditdata 
-            // where userId = ? AND status=1 group by year(creditDate) order by year ASC`
-            //         const debitsql = `select year(debitDate) as year, SUM(debitAmount) as totalAmount from debitdata 
-            // where userId = ? AND status=1 group by year(debitDate) order by year ASC`
-            //         const lendingsql = `select year(lendingDate) as year, SUM(lendingAmount) as totalAmount from lendigdata 
-            // where userId = ? AND status=1 group by year(lendingDate) order by year ASC`
-
-            getChart(`${userQueries.yearCreditChartQuery};${userQueries.yearDebitChartQuery};${userCountSql};${userQueries.yearLendingChartQuery};`, [userId, userId, userId])
+            // getChart(`${userQueries.yearCreditChartQuery};${userQueries.yearDebitChartQuery};${userQueries.yearLendingChartQuery};`, [userId, userId, userId])
+            getChart(`${userQueries.monthCreditChartQuery};${userQueries.monthDebitChartQuery};`, [userId, year, userId, year])
         } else if (monthoryear === "month") {
-            //         const creditsql = `select monthname(creditDate) as month, SUM(creditAmount) as totalAmount from creditdata c 
-            // where userId=? and year(creditDate)=? AND status=1 group by monthname(creditDate) order by month ASC `
-            //         const debitsql = `select monthname(debitDate) as month, SUM(debitAmount) as totalAmount from debitdata 
-            // where userId = ? AND year(debitDate)=? AND status=1 group by monthname(debitDate) order by month ASC`
-            //         const lendingsql = `select monthname(lendingDate) as month, SUM(lendingAmount) as totalAmount from lendigdata 
-            // where userId = ? AND year(lendingDate)=? AND status=1 group by monthname(lendingDate) order by month ASC`
-
-            getChart(`${userQueries.monthCreditChartQuery};${userQueries.monthDebitChartQuery};${userCountSql};${userQueries.monthLendingChartQuery};`, [userId, year, userId, year, userId, year])
+            // getChart(`${userQueries.monthCreditChartQuery};${userQueries.monthDebitChartQuery};${userQueries.monthLendingChartQuery};`, [userId, year, userId, year, userId, year])
+            getChart(`${userQueries.dayCreditChartQuery};${userQueries.dayDebitChartQuery}`, [userId, year, _month, userId, year, _month])
         } else {
             return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
             // return res.status(400).json({ status: 400, error: `${monthoryear} type is not defined` })
@@ -894,4 +877,23 @@ module.exports.getChartdata = async (req, res) => {
         // return res.status(500).json({ status: 500, error: `server error` })
     }
 
+}
+
+// get the available balance and total active users
+module.exports.getTotalBalance = async (req, res) => {
+    try {
+        const { userId } = req.params
+        mySQLInstance.executeQuery(`${userQueries.totalUsersQuery};${userQueries.balanceQuery};`, [userId, userId]).then(result => {
+            let data = {
+                totalUsers: result[0][0]?.totalUsers,
+                available_balance: result[1][0].available_balance || 0
+            }
+            return returnData(res, 200, ERROR_MESSAGES.SUCCESS.DATAFOUND, data)
+        }).catch(err => {
+            return serverErrorMsg(res)
+        })
+
+    } catch (err) {
+        return serverErrorMsg(res)
+    }
 }

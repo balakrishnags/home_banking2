@@ -48,7 +48,6 @@ export const CommonTable = (props) => {
     );
 
     const { globalFilter, pageSize, pageIndex } = state;
-    console.log("🚀 ~ file: CommonTable.js:41 ~ CommonTable ~ page:", page)
 
     return (
         <>

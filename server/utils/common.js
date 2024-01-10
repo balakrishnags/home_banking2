@@ -1,4 +1,5 @@
 var moment = require("moment");
+const ERROR_MESSAGES = require("./constants/messages");
 
 // timestamp
 const presenttimestamp = moment().format()
@@ -31,4 +32,12 @@ const returnData = (res, status, message, data) => {
     return _data
 }
 
-module.exports = { presenttimestamp, encryptData, returnData, decryptData }
+const convertToYearFormat = (date) => {
+    return moment(new Date(date)).format('YYYY-MM-DD')
+}
+
+const serverErrorMsg = (res) => {
+    return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+}
+
+module.exports = { presenttimestamp, encryptData, returnData, decryptData, convertToYearFormat, serverErrorMsg }
