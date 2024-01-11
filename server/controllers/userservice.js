@@ -232,7 +232,7 @@ module.exports.updateCreditDebit = async (req, res) => {
         if (type) {
             const updateMoneyDetail = (sql, values, msg) => {
                 db.query(sql, values, (err, result) => {
-                    console.log("🚀 ~ file: userservice.js:725 ~ db.query ~ result:", result)
+                    // console.log("🚀 ~ file: userservice.js:725 ~ db.query ~ result:", result)
                     if (err) {
                         // console.error('Error inserting user data:', err);
                         return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
@@ -825,11 +825,11 @@ module.exports.getChartdata = async (req, res) => {
         const getChart = (sql, values) => {
             db.query(sql, values, async (err, result) => {
                 if (err) {
-                    console.log("🚀 ~ file: userservice.js:1462 ~ db.query ~ err:", err)
+                    // console.log("🚀 ~ file: userservice.js:1462 ~ db.query ~ err:", err)
                     return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
                     // return res.status(500).json({ status: 500, error: `server error` })
                 } else {
-                    console.log("🚀 ~ file: userservice.js:1463 ~ db.query ~ result:", result)
+                    // console.log("🚀 ~ file: userservice.js:1463 ~ db.query ~ result:", result)
                     // let totalCredit = 0;
                     // let totaldebit = 0;
                     // if (monthoryear === "year") {

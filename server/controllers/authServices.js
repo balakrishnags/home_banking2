@@ -1,8 +1,8 @@
 const bcrypt = require("bcrypt")
 var jwt = require('jsonwebtoken');
-const moment = require("moment")
+// const moment = require("moment")
 
-const db = require("../database/database")
+// const db = require("../database/database")
 const RegEx = require("../utils/regEx");
 const authQueries = require("../database/queries/authqueries");
 const ERROR_MESSAGES = require("../utils/constants/messages");

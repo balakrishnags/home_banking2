@@ -48,7 +48,7 @@ export const BarChart = (props) => {
     });
 
     useEffect(() => {
-        // Fetch your data from the API
+        // Fetch data from the API
         const fetchData = async () => {
             try {
                 // let _dataCategories = type === "year" ? data.map(item => item.year) : monthList

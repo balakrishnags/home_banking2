@@ -42,6 +42,30 @@ module.exports = {
             GET_PASSWORD_EVENT: "/sse/admin",
             UPDATE_PASSWORD_EVENT: "/sse/updatePasswordEvent",
             UPDATE_DETAILS_EVENT: "/sse/updateUserDetailsEvent"
+        },
+        USER: {
+            CREATE_ROLE: "/createrole",
+            UPDATE_ROLE: "/updaterole/:roleId",
+            GET_ROLE: "/getrolelist",
+            DELETE_ROLE: "/deleterole/:roleId",
+            ADD_CREDIT_DEBIT: "/creditdebit/add",
+            UPDATE_CREDIT_DEBIT: "/creditdebit/update/:dataId",
+            GET_CREDIT_DEBIT_LIST: "/creditdebit/getlist/:type/:userId",
+            DELETE_CREDIT_DEBIT: "/creditdebit/deletelist/:type/:dataId",
+            ADD_PAYMENTDETAILS: "/payment/add",
+            UPDATE_PAYMENTDETAILS: "/payment/update/:payId",
+            GET_PAYMENTDETAILS: "/payment/getlist/:userId/:lendingId/:type",
+            DELETE_PAYMENTDETAILS: "/payment/delete/:userId/:lendingId/:payId/:type",
+            CHART_DATA: "/chartdata/:userId/:monthoryear/:date",
+            GET_BALANCE: "/userbalance/:userId",
+        },
+        ENVLIST: {
+            GET_ENVLIST: "/envlist/get",
+            ADD_ENVLIST: "/envlist/add",
+            UPDATE_ENVLIST: "/envlist/update/:envName",
+            DELETE_ENVLIST: "/envlist/delete/:envName",
+            ADD_ENV_DATA: "/envdata/add",
+            GET_ENV_DATA: "/envdata/list/:envtype",
         }
     },
 }
