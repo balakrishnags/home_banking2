@@ -53,8 +53,8 @@ export const BarChart = (props) => {
             try {
                 // let _dataCategories = type === "year" ? data.map(item => item.year) : monthList
                 // let _dataSeries = type === "year" ? data.map(item => item.totalAmount) : monthDataList(data)
-                let _dataCategories = type === "year" ? monthList : dayList
-                let _dataSeries = type === "year" ? monthDataList(data) : dayDataList(data)
+                let _dataCategories = type === "year" ? monthList : (type === "allyear" ? data.map(item => item.year) : dayList)
+                let _dataSeries = type === "year" ? monthDataList(data) : (type === "allyear" ? data.map(item => item.totalAmount) : dayDataList(data))
 
                 // Update the state with new data
                 setChartData({

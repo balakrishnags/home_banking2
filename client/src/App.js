@@ -14,23 +14,15 @@ import { SnackBar } from "./components/SnackBars/SnackBar";
 
 function App() {
   const { userInfo, loader, isExpired, snackbar } = useSelector((state) => state.UIStore);
-  // console.log("🚀 ~ file: App.js:17 ~ App ~ snackbar:", snackbar)
-  // let role = userInfo ? userInfo.role_name || userInfo.role : null
-  // let isAuthenticate = userInfo ? userInfo.isAuthenticated : null
-  // const organization_name = userInfo ? userInfo.organization_name : null
-  // var adminId = userInfo ? userInfo.emp_id : null
 
   // let show = (role !== "super_admin" && isAuthenticate == 0)
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  // const handleUpdateModal = () => {
+
+  // const handleLogoutModal = () => {
   //   dispatch(resetAuth());
-  //   navigate(`/login`)
+  //   navigate("/login")
   // }
-  const handleLogoutModal = () => {
-    dispatch(resetAuth());
-    navigate("/login")
-  }
 
   const handlesnackClose = (event, reason) => {
     if (reason === 'clickaway') {

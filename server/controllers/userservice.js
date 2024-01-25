@@ -58,10 +58,6 @@ module.exports.createrole = async (req, res) => {
         }
     } else {
         return returnData(res, 400, ERROR_MESSAGES.ERROR.ROLENAMEREQUIRED)
-        // return res.status(400).send({
-        //     status: 400,
-        //     error: "Role name Required"
-        // })
     }
 }
 
@@ -156,71 +152,102 @@ module.exports.deleterole = async (req, res) => {
 module.exports.addCreditDebit = async (req, res) => {
     try {
         const { userId, description, creditDate, creditAmount, type } = req.body
-        // const isUser = 'SELECT status from users WHERE userId=? and status=1'
 
-        db.query(userQueries.isUser, [userId], async (err, result1) => {
-            if (err) {
-                // console.error('Error inserting user data:', err);
-                return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                // return res.status(500).json({ status: 500, error: 'Internal server error' });
-            } else {
-                if (result1.length < 1) {
-                    return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
-                    // return res.status(404).json({ status: 404, error: 'User not Found' });
-                } else if (type) {
-                    const addMoneyDetail = (sql, values, msg) => {
-                        db.query(sql, values, (err, result) => {
-                            if (err) {
-                                // console.error('Error inserting user data:', err);
-                                return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                                // return res.status(500).json({ status: 500, error: 'Internal server error' });
-                            } else {
-                                return returnData(res, 201, `${msg} ${ERROR_MESSAGES.SUCCESS.DATADDED}`)
-                                // return res.status(201).json({ status: 201, message: msg });
-                            }
-                        });
-                    }
-
-                    if (type === "credit") {
-                        // const sql = 'INSERT INTO creditdata (userId,description,creditDate,creditAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?)';
-                        const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
-                        addMoneyDetail(userQueries.insertCreditQuery, values, "Credit")
-                    } else if (type === "debit") {
-                        // const sql = 'INSERT INTO debitdata (userId,description,debitDate,debitAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?)';
-                        const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
-                        addMoneyDetail(userQueries.insertDebitQuery, values, "Debit")
-                    } else if (type === "lending") {
-                        // const sql = 'INSERT INTO lendigdata (userId,description,lendingDate,lendingAmount,createdDate,updatedDate,status,paymentStatus) VALUES (?,?,?,?,?,?,?,?)';
-                        const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
-                        addMoneyDetail(userQueries.insertLendingQuery, values, "Lending")
-                    } else if (type === "borrow") {
-                        // const sql = 'INSERT INTO borrowingdata (userId,description,borrowDate,borrowAmount,createdDate,updatedDate,status,paymentStatus) VALUES (?,?,?,?,?,?,?,?)';
-                        const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
-                        addMoneyDetail(userQueries.insertBorrowQuery, values, "Borrowing")
-                    } else {
-                        return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
-
-                        // return res.status(400).send({
-                        //     status: 400,
-                        //     error: "type is not defined"
-                        // })
-                    }
-                } else {
-                    return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEREQUIRED)
-                    // return res.status(400).send({
-                    //     status: 400,
-                    //     error: "type required"
-                    // })
+        // checking the user query
+        mySQLInstance.executeQuery(userQueries.isUser, [userId]).then(result1 => {
+            if (result1.length < 1) {
+                return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
+            } else if (type) {
+                // common function to execute query
+                const addMoneyDetail = (sql, values, msg) => {
+                    // executing the adding debit credit query
+                    mySQLInstance.executeQuery(sql, values).then(result => {
+                        return returnData(res, 201, `${msg} ${ERROR_MESSAGES.SUCCESS.DATADDED}`)
+                    }).catch(err => {
+                        return serverErrorMsg(res)
+                    })
                 }
+
+                if (type === "credit") {
+                    const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
+                    addMoneyDetail(userQueries.insertCreditQuery, values, "Credit")
+                } else if (type === "debit") {
+                    const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
+                    addMoneyDetail(userQueries.insertDebitQuery, values, "Debit")
+                } else if (type === "lending") {
+                    const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
+                    addMoneyDetail(userQueries.insertLendingQuery, values, "Lending")
+                } else if (type === "borrow") {
+                    const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
+                    addMoneyDetail(userQueries.insertBorrowQuery, values, "Borrowing")
+                } else {
+                    return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
+                }
+            } else {
+                return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEREQUIRED)
             }
+
+        }).catch(err => {
+            return serverErrorMsg(res)
         })
-    } catch (err) {
-        // console.log("🚀 ~ file: userservice.js:705 ~ module.exports.signup= ~ err:===>", err)
-        return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-        // return res.status(500).send({
-        //     status: 500,
-        //     error: "Internal server error"
+        // db.query(userQueries.isUser, [userId], async (err, result1) => {
+        //     if (err) {
+        //         // console.error('Error inserting user data:', err);
+        //         return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+        //         // return res.status(500).json({ status: 500, error: 'Internal server error' });
+        //     } else {
+        //         if (result1.length < 1) {
+        //             return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
+        //             // return res.status(404).json({ status: 404, error: 'User not Found' });
+        //         } else if (type) {
+        //             const addMoneyDetail = (sql, values, msg) => {
+        //                 db.query(sql, values, (err, result) => {
+        //                     if (err) {
+        //                         // console.error('Error inserting user data:', err);
+        //                         return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+        //                         // return res.status(500).json({ status: 500, error: 'Internal server error' });
+        //                     } else {
+        //                         return returnData(res, 201, `${msg} ${ERROR_MESSAGES.SUCCESS.DATADDED}`)
+        //                         // return res.status(201).json({ status: 201, message: msg });
+        //                     }
+        //                 });
+        //             }
+
+        //             if (type === "credit") {
+        //                 // const sql = 'INSERT INTO creditdata (userId,description,creditDate,creditAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?)';
+        //                 const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
+        //                 addMoneyDetail(userQueries.insertCreditQuery, values, "Credit")
+        //             } else if (type === "debit") {
+        //                 // const sql = 'INSERT INTO debitdata (userId,description,debitDate,debitAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?)';
+        //                 const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
+        //                 addMoneyDetail(userQueries.insertDebitQuery, values, "Debit")
+        //             } else if (type === "lending") {
+        //                 // const sql = 'INSERT INTO lendigdata (userId,description,lendingDate,lendingAmount,createdDate,updatedDate,status,paymentStatus) VALUES (?,?,?,?,?,?,?,?)';
+        //                 const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
+        //                 addMoneyDetail(userQueries.insertLendingQuery, values, "Lending")
+        //             } else if (type === "borrow") {
+        //                 // const sql = 'INSERT INTO borrowingdata (userId,description,borrowDate,borrowAmount,createdDate,updatedDate,status,paymentStatus) VALUES (?,?,?,?,?,?,?,?)';
+        //                 const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
+        //                 addMoneyDetail(userQueries.insertBorrowQuery, values, "Borrowing")
+        //             } else {
+        //                 return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
+
+        //                 // return res.status(400).send({
+        //                 //     status: 400,
+        //                 //     error: "type is not defined"
+        //                 // })
+        //             }
+        //         } else {
+        //             return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEREQUIRED)
+        //             // return res.status(400).send({
+        //             //     status: 400,
+        //             //     error: "type required"
+        //             // })
+        //         }
+        //     }
         // })
+    } catch (err) {
+        return serverErrorMsg(res)
     }
 }
 
@@ -231,64 +258,40 @@ module.exports.updateCreditDebit = async (req, res) => {
         const { dataId } = req.params
         if (type) {
             const updateMoneyDetail = (sql, values, msg) => {
-                db.query(sql, values, (err, result) => {
-                    // console.log("🚀 ~ file: userservice.js:725 ~ db.query ~ result:", result)
-                    if (err) {
-                        // console.error('Error inserting user data:', err);
-                        return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                        // return res.status(500).json({ status: 500, error: 'Internal server error' });
+                // executing the update credit debit query
+                mySQLInstance.executeQuery(sql, values).then(result => {
+                    if (result.length < 1) {
+                        return returnData(res, 404, ERROR_MESSAGES.ERROR.NODATAFOUND)
+                    } else if (result.affectedRows < 1) {
+                        return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
                     } else {
-                        if (result.length < 1) {
-                            return returnData(res, 404, ERROR_MESSAGES.ERROR.NODATAFOUND)
-                            // return res.status(404).json({ status: 404, error: 'No data found' });
-                        } else if (result.affectedRows < 1) {
-                            return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
-                            // return res.status(400).json({ status: 400, error: 'Enter Valid data Id' });
-                        } else {
-                            return returnData(res, 201, `${msg} ${ERROR_MESSAGES.SUCCESS.DATAUPDATED}`)
-                            // return res.status(201).json({ status: 201, message: msg });
-                        }
+                        return returnData(res, 200, `${msg} ${ERROR_MESSAGES.SUCCESS.DATAUPDATED}`)
                     }
-                });
+                }).catch(err => {
+                    return serverErrorMsg(res)
+                })
             }
 
             if (type === "credit") {
-                // const sql = 'UPDATE creditdata SET description=?,creditDate=?,creditAmount=?,updatedDate=? WHERE creditId=? AND status=1';
                 const values = [description, creditDate, creditAmount, presenttimestamp, dataId];
                 updateMoneyDetail(userQueries.updateCreditQuery, values, "Credit")
             } else if (type === "debit") {
-                // const sql = 'UPDATE debitdata SET description=?,debitDate=?,debitAmount=?,updatedDate=? WHERE debitId=? AND status=1';
                 const values = [description, creditDate, creditAmount, presenttimestamp, dataId];
                 updateMoneyDetail(userQueries.updateDebitQuery, values, "Debit")
             } else if (type === "lending") {
-                // const sql = 'UPDATE lendigdata SET description=?,lendingDate=?,lendingAmount=?,updatedDate=? WHERE lendId=? AND status=1';
                 const values = [description, creditDate, creditAmount, presenttimestamp, dataId];
                 updateMoneyDetail(userQueries.updateLendingQuery, values, "Lending")
             } else if (type === "borrow") {
-                // const sql = 'UPDATE borrowingdata SET description=?,borrowDate=?,borrowAmount=?,updatedDate=? WHERE borrowId=? AND status=1';
                 const values = [description, creditDate, creditAmount, presenttimestamp, dataId];
                 updateMoneyDetail(userQueries.updateBorrowQuery, values, "borrowing")
             } else {
                 return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
-                // return res.status(400).send({
-                //     status: 400,
-                //     error: "type entered is not defined"
-                // })
             }
         } else {
             return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEREQUIRED)
-            // return res.status(400).send({
-            //     status: 400,
-            //     error: "type required"
-            // })
         }
     } catch (err) {
-        // console.log("🚀 ~ file: userservice.js:705 ~ module.exports.signup= ~ err:===>", err)
-        return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-        // return res.status(500).send({
-        //     status: 500,
-        //     error: "Internal server error"
-        // })
+        return serverErrorMsg(res)
     }
 }
 
@@ -299,147 +302,77 @@ module.exports.getCreditDebitList = async (req, res) => {
 
         if (type) {
             const getDetail = (sql) => {
-                db.query(sql, [userId], (err, result) => {
-                    // console.log("🚀 ~ file: userservice.js:1006 ~ db.query ~ result:", result)
-                    if (err) {
-                        // console.error('Error inserting user data:', err);
-                        return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                        // return res.status(500).json({ status: 500, error: 'Internal server error' });
-                    } else if (result.length < 1) {
+                // executing the get the list of debit credit query
+                mySQLInstance.executeQuery(sql, [userId]).then(result => {
+                    if (result.length < 1) {
                         return returnData(res, 404, ERROR_MESSAGES.ERROR.NODATAFOUND)
-                        // return res.status(404).json({ status: 404, error: "No data found" });
                     } else {
                         return returnData(res, 200, ERROR_MESSAGES.SUCCESS.DATAFOUND, result)
                     }
-                    // return res.status(200).json({ status: 200, message: "data found", data: result });
-                });
+                }).catch(err => {
+                    return serverErrorMsg(res)
+                })
             }
 
             if (type === "credit") {
-                // const sql = 'SELECT creditId,description,DATE_FORMAT(creditDate, "%Y-%m-%d") AS creditDate,creditAmount,createdDate,updatedDate FROM creditdata WHERE userId=? AND status=1 ORDER BY creditDate DESC';
                 getDetail(userQueries.getCreditQuery)
             } else if (type === "debit") {
-                // const sql = 'SELECT debitId,description,DATE_FORMAT(debitDate, "%Y-%m-%d") AS debitDate,debitAmount,createdDate,updatedDate FROM debitdata WHERE userId=? AND status=1 ORDER BY debitDate DESC';
                 getDetail(userQueries.getDebitQuery)
             } else if (type === "lending") {
-                // const sql = `SELECT ld.lendId, ld.lendingAmount, DATE_FORMAT(ld.lendingDate, "%Y-%m-%d") AS lendingDate,
-                //             ld.description,ld.paymentStatus, SUM(pt.paymentAmount) AS totalPaymentAmount,
-                //             ld.lendingAmount - SUM(pt.paymentAmount) AS pendingAmount
-                //             FROM
-                //                 home_banking.lendigdata ld
-                //             LEFT JOIN
-                //             home_banking.paymenthistory pt ON ld.lendId = pt.lendId AND pt.status = 1
-                //             where ld.userId=? AND ld.status=1
-                //             GROUP BY
-                //                 ld.lendId, ld.lendingAmount
-                //             ORDER BY
-                //                 ld.lendingDate DESC;`
-
                 getDetail(userQueries.getLendingQuery)
             } else if (type === "borrow") {
-                // const sql = `SELECT ld.borrowId, ld.borrowAmount, DATE_FORMAT(ld.borrowDate, "%Y-%m-%d") AS borrowDate,
-                //             ld.description,ld.paymentStatus, SUM(pt.paymentAmount) AS totalPaymentAmount,
-                //             ld.borrowAmount - SUM(pt.paymentAmount) AS pendingAmount
-                //             FROM
-                //                 home_banking.borrowingdata ld
-                //             LEFT JOIN
-                //             home_banking.paymenthistory pt ON ld.borrowId = pt.borrowId AND pt.status = 1
-                //             where ld.userId=? AND ld.status=1
-                //             GROUP BY
-                //                 ld.borrowId, ld.borrowAmount
-                //             ORDER BY
-                //                 ld.borrowDate DESC;`
-
                 getDetail(userQueries.getBorrowQuery)
             } else {
                 return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
-                // return res.status(400).send({
-                //     status: 400,
-                //     error: "type entered is not defined"
-                // })
             }
         } else {
             return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEREQUIRED)
-            // return res.status(400).send({
-            //     status: 400,
-            //     error: "type required"
-            // })
         }
     } catch (err) {
-        // console.log("🚀 ~ file: userservice.js:705 ~ module.exports.signup= ~ err:===>", err)
-        return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-        // return res.status(500).send({
-        //     status: 500,
-        //     error: "Internal server error"
-        // })
+        return serverErrorMsg(res)
     }
 }
 
 // delete creditdebit 
-// get creditDebit list API 
 module.exports.deleteCreditDebitList = async (req, res) => {
     try {
         const { type, dataId } = req.params
         if (type) {
             const updateMoneyDetail = (sql, values, msg) => {
-                db.query(sql, values, (err, result) => {
-                    // console.log("🚀 ~ file: userservice.js:725 ~ db.query ~ result:", result.changedRows)
-                    if (err) {
-                        // console.error('Error inserting user data:', err);
-                        return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                        // return res.status(500).json({ status: 500, error: 'Internal server error' });
+                // executing the delete the credit debit details query
+                mySQLInstance.executeQuery(sql, values).then(result => {
+                    if (result.length < 1) {
+                        return returnData(res, 404, ERROR_MESSAGES.ERROR.NODATAFOUND)
+                    } else if (result.changedRows < 1) {
+                        return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
                     } else {
-                        if (result.length < 1) {
-                            return returnData(res, 404, ERROR_MESSAGES.ERROR.NODATAFOUND)
-                            // return res.status(404).json({ status: 400, error: 'No data found' });
-                        } else if (result.changedRows < 1) {
-                            return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
-                            // return res.status(400).json({ status: 400, error: 'Enter Valid data Id' });
-                        } else {
-                            return returnData(res, 200, `${msg} ${ERROR_MESSAGES.SUCCESS.DATADELETED}`)
-                            // return res.status(200).json({ status: 200, message: msg });
-                        }
+                        return returnData(res, 200, `${msg} ${ERROR_MESSAGES.SUCCESS.DATADELETED}`)
                     }
-                });
+                }).catch(err => {
+                    return serverErrorMsg(res)
+                })
             }
 
             if (type === "credit") {
-                // const sql = 'UPDATE creditdata SET status=0,updatedDate=? WHERE creditId=?';
                 const values = [presenttimestamp, dataId];
                 updateMoneyDetail(userQueries.deleteCreditQuery, values, "Credit")
             } else if (type === "debit") {
-                // const sql = 'UPDATE debitdata SET status=0,updatedDate=? WHERE debitId=?';
                 const values = [presenttimestamp, dataId];
                 updateMoneyDetail(userQueries.deleteDebitQuery, values, "Debit")
             } else if (type === "lending") {
-                // const sql = 'UPDATE lendigdata SET status=0,updatedDate=? WHERE lendId=?';
                 const values = [presenttimestamp, dataId];
                 updateMoneyDetail(userQueries.deleteLendingQuery, values, "Lending")
             } else if (type === "borrow") {
-                // const sql = 'UPDATE borrowingdata SET status=0,updatedDate=? WHERE borrowId=?';
                 const values = [presenttimestamp, dataId];
                 updateMoneyDetail(userQueries.deleteBorrowQuery, values, "borrowed")
             } else {
                 return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
-                // return res.status(400).send({
-                //     status: 400,
-                //     error: "type entered is not defined"
-                // })
             }
         } else {
             return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEREQUIRED)
-            // return res.status(400).send({
-            //     status: 400,
-            //     error: "type required"
-            // })
         }
     } catch (err) {
-        // console.log("🚀 ~ file: userservice.js:705 ~ module.exports.signup= ~ err:===>", err)
-        return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-        // return res.status(500).send({
-        //     status: 500,
-        //     error: "Internal server error"
-        // })
+        return serverErrorMsg(res)
     }
 }
 
@@ -447,100 +380,240 @@ module.exports.deleteCreditDebitList = async (req, res) => {
 module.exports.addPaymentDetails = async (req, res) => {
     try {
         const { userId, lendingId, paymentDescription, paymentDate, paymentAmount, type } = req.body
+        // checking type , type should be borrow or lending
+        let isBorrowLending = (type === "borrow") || (type === "lending");
 
-        // const isUser = 'SELECT status from users WHERE userId=? and status=1'
-        if (type === "borrow" || type === "lending") {
-            db.query(userQueries.isUser, [userId], async (err, result1) => {
-                if (err) {
-                    // console.error('Error inserting user data:', err);
-                    return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                    // return res.status(500).json({ status: 500, error: 'Internal server error' });
+        if (isBorrowLending) {
+            // checking the user query
+            mySQLInstance.executeQuery(userQueries.isUser, [userId]).then(result1 => {
+                if (result1.length < 1) {
+                    return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
                 } else {
-                    if (result1.length < 1) {
-                        return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
-                        // return res.status(404).json({ status: 404, error: 'User not Found' });
-                    } else {
+                    // getting the lending or borrow amount
+                    const islending = type === "lending" ? userQueries.getLendingAmountQuery : userQueries.getBorrowAmountQuery
+                    const lendValues = [userId, lendingId];
+                    // executing query
+                    mySQLInstance.executeQuery(islending, lendValues).then(result => {
+                        if (result.length < 1) {
+                            return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
+                        } else {
+                            // lending amount or borrow amount
+                            const totalAmount = type === "lending" ? result[0].lendingAmount : result[0].borrowAmount
 
-                        const addPaymentDetail = (sql, values) => {
-                            db.query(sql, values, (err, result) => {
-                                if (err) {
-                                    // console.error('Error inserting user data:', err);
-                                    return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                                    // return res.status(500).json({ status: 500, error: 'Internal server error' });
-                                } else if (result.affectedRows < 1) {
-                                    return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
-                                    // return res.status(400).json({ status: 400, error: 'Provide valid lending id related to user' });
+                            // checking and getting paid amount against the totalamount
+                            const checkTotalPaymentQuery = type === "lending" ? userQueries.lendingTotalPaymentQuery : userQueries.borrowTotalPaymentQuery
+                            //  excecuting query 
+                            mySQLInstance.executeQuery(checkTotalPaymentQuery, lendValues).then(result2 => {
+                                // total paid amount
+                                const totalPayment = result2[0].totalPayment || 0
+                                /** 
+                                 * if amount is paid fully previously, thrwing error 
+                                 * if the paying amount is gretaer than the totalamount, throwing error
+                                 * else adding the payment details and updating the paymentstatus of that lending or borrowing amount
+                                */
+                                if (totalPayment == totalAmount) {
+                                    return returnData(res, 400, ERROR_MESSAGES.SUCCESS.PAYMENTDONE)
+                                } else if ((totalPayment + paymentAmount) > totalAmount) {
+                                    return returnData(res, 400, `Payment Amount exceeds the ${type === "lending" ? "Lending" : "Borrow"} Amount`)
                                 } else {
-                                    return returnData(res, 201, ERROR_MESSAGES.SUCCESS.DATADDED)
-                                    // return res.status(201).json({ status: 201, message: "Payment Details updated" });
-                                }
-                            });
-                        }
-                        // let islending = type === "lending" ? 'SELECT lendingAmount FROM lendigdata WHERE userID=? AND lendId=? AND status=1'
-                        //     : 'SELECT borrowAmount FROM borrowingdata WHERE userID=? AND borrowid=? AND status=1'
-                        const islending = type === "lending" ? userQueries.getLendingAmountQuery : userQueries.getBorrowAmountQuery
-                        const lendValues = [userId, lendingId];
-                        db.query(islending, lendValues, (err, result) => {
-                            if (err) {
-                                // console.error('Error inserting user data:', err);
-                                return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                                // return res.status(500).json({ status: 500, error: 'Internal server error' });
-                            } else if (result.length < 1) {
-                                return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
-                                // return res.status(400).json({ status: 400, error: `Provide valid ${type === "lending" ? "lending" : "borrow"} id related to user` });
-                            } else {
-                                const lendingAmount = type === "lending" ? result[0].lendingAmount : result[0].borrowAmount
-
-                                // const checkTotalPaymentQuery = `SELECT SUM(paymentAmount) AS totalPayment FROM paymenthistory WHERE userId = ? AND ${type === "lending" ? "lendId" : "borrowId"} = ? AND status=1`;
-                                const checkTotalPaymentQuery = type === "lending" ? userQueries.lendingTotalPaymentQuery : userQueries.borrowTotalPaymentQuery
-                                db.query(checkTotalPaymentQuery, lendValues, async (err, result2) => {
-                                    if (err) {
-                                        // console.log("🚀 ~ file: userservice.js:924 ~ db.query ~ err:", err)
-                                        return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                                        // return res.status(500).json({ status: 500, error: 'Internal server error' });
-                                    } else {
-                                        // console.log("🚀 ~ file: userservice.js:923 ~ db.query ~ result2:", result2)
-                                        const totalPayment = result2[0].totalPayment || 0
-                                        if (totalPayment == lendingAmount) {
-                                            return returnData(res, 400, ERROR_MESSAGES.SUCCESS.PAYMENTDONE)
-                                            // return res.status(400).json({ status: 400, error: 'Payment already made/Completed' });
-                                        } else if ((totalPayment + paymentAmount) > lendingAmount) {
-                                            return returnData(res, 400, `Payment Amount exceeds the ${type === "lending" ? "Lending" : "Borrow"} Amount`)
-                                            // return res.status(400).json({ status: 400, error: `Payment Amount exceeds the ${type === "lending" ? "Lending" : "Borrow"} Amount` });
+                                    // query for adding the payment details
+                                    const sql = type === "lending" ? userQueries.insertLendingPaymentQuery : userQueries.insertBorrowPaymentQuery
+                                    // query for updating the payment status
+                                    const lendingPaymentSql = ((totalPayment + paymentAmount) === totalAmount) ? (type === "lending" ? userQueries.updateLendingPaymentStatus1Query : userQueries.updateBorrowPaymentStatus1Query)
+                                        : (type === "lending" ? userQueries.updateLendingPaymentStatus2Query : userQueries.updateBorrowPaymentStatus2Query)
+                                    // query values
+                                    const values = [userId, lendingId, paymentDescription, paymentDate, paymentAmount, presenttimestamp, presenttimestamp, 1, lendingId];
+                                    // executing queries
+                                    mySQLInstance.executeQuery(`${sql};${lendingPaymentSql}`, values).then(result3 => {
+                                        if (result3.affectedRows < 1) {
+                                            return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
+                                            // return res.status(400).json({ status: 400, error: 'Provide valid lending id related to user' });
                                         } else {
-                                            // const sql = type === "lending" ? 'INSERT INTO paymenthistory (userId, lendId, paymentDescription, paymentDate, paymentAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?,?)'
-                                            //     : 'INSERT INTO paymenthistory (userId, borrowId, paymentDescription, paymentDate, paymentAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?,?)';
-                                            // const lendingPaymentSql = ((totalPayment + paymentAmount) === lendingAmount) ? `UPDATE ${type === "lending" ? "lendigdata" : "borrowingdata"} SET paymentStatus=1 WHERE ${type === "lending" ? "lendId" : "borrowId"}=?`
-                                            //     : `UPDATE ${type === "lending" ? "lendigdata" : "borrowingdata"} SET paymentStatus=2 WHERE ${type === "lending" ? "lendId" : "borrowId"}=?`
-
-                                            const sql = type === "lending" ? userQueries.insertLendingPaymentQuery : userQueries.insertBorrowPaymentQuery
-                                            const lendingPaymentSql = ((totalPayment + paymentAmount) === lendingAmount) ? (type === "lending" ? userQueries.updateLendingPaymentStatus1Query : userQueries.updateBorrowPaymentStatus1Query)
-                                                : (type === "lending" ? userQueries.updateLendingPaymentStatus2Query : userQueries.updateBorrowPaymentStatus2Query)
-
-                                            const values = [userId, lendingId, paymentDescription, paymentDate, paymentAmount, presenttimestamp, presenttimestamp, 1, lendingId];
-                                            addPaymentDetail(`${sql};${lendingPaymentSql}`, values)
+                                            return returnData(res, 201, ERROR_MESSAGES.SUCCESS.DATADDED)
+                                            // return res.status(201).json({ status: 201, message: "Payment Details updated" });
                                         }
-                                    }
-                                })
-                            }
-                        });
-                    }
+                                    }).catch(err => {
+                                        return serverErrorMsg(res)
+                                    })
+                                }
+                            }).catch(err => {
+                                return serverErrorMsg(res)
+                            })
+                            // db.query(checkTotalPaymentQuery, lendValues, async (err, result2) => {
+                            //     if (err) {
+                            //         // console.log("🚀 ~ file: userservice.js:924 ~ db.query ~ err:", err)
+                            //         return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+                            //         // return res.status(500).json({ status: 500, error: 'Internal server error' });
+                            //     } else {
+                            //         // console.log("🚀 ~ file: userservice.js:923 ~ db.query ~ result2:", result2)
+                            //         const totalPayment = result2[0].totalPayment || 0
+                            //         if (totalPayment == totalAmount) {
+                            //             return returnData(res, 400, ERROR_MESSAGES.SUCCESS.PAYMENTDONE)
+                            //         } else if ((totalPayment + paymentAmount) > totalAmount) {
+                            //             return returnData(res, 400, `Payment Amount exceeds the ${type === "lending" ? "Lending" : "Borrow"} Amount`)
+                            //         } else {
+                            //             const sql = type === "lending" ? userQueries.insertLendingPaymentQuery : userQueries.insertBorrowPaymentQuery
+                            //             const lendingPaymentSql = ((totalPayment + paymentAmount) === totalAmount) ? (type === "lending" ? userQueries.updateLendingPaymentStatus1Query : userQueries.updateBorrowPaymentStatus1Query)
+                            //                 : (type === "lending" ? userQueries.updateLendingPaymentStatus2Query : userQueries.updateBorrowPaymentStatus2Query)
+
+                            //             const values = [userId, lendingId, paymentDescription, paymentDate, paymentAmount, presenttimestamp, presenttimestamp, 1, lendingId];
+                            //             addPaymentDetail(`${sql};${lendingPaymentSql}`, values)
+                            //         }
+                            //     }
+                            // })
+                        }
+                    }).catch(err => {
+                        return serverErrorMsg(res)
+                    })
+                    // const addPaymentDetail = (sql, values) => {
+                    //     db.query(sql, values, (err, result) => {
+                    //         if (err) {
+                    //             // console.error('Error inserting user data:', err);
+                    //             return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+                    //             // return res.status(500).json({ status: 500, error: 'Internal server error' });
+                    //         } else if (result.affectedRows < 1) {
+                    //             return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
+                    //             // return res.status(400).json({ status: 400, error: 'Provide valid lending id related to user' });
+                    //         } else {
+                    //             return returnData(res, 201, ERROR_MESSAGES.SUCCESS.DATADDED)
+                    //             // return res.status(201).json({ status: 201, message: "Payment Details updated" });
+                    //         }
+                    //     });
+                    // }
+                    // let islending = type === "lending" ? 'SELECT lendingAmount FROM lendigdata WHERE userID=? AND lendId=? AND status=1'
+                    //     : 'SELECT borrowAmount FROM borrowingdata WHERE userID=? AND borrowid=? AND status=1'
+                    // const islending = type === "lending" ? userQueries.getLendingAmountQuery : userQueries.getBorrowAmountQuery
+                    // const lendValues = [userId, lendingId];
+                    // db.query(islending, lendValues, (err, result) => {
+                    // if (err) {
+                    //     // console.error('Error inserting user data:', err);
+                    //     return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+                    // return res.status(500).json({ status: 500, error: 'Internal server error' });
+                    // } else if (result.length < 1) {
+                    //     return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
+                    //     // return res.status(400).json({ status: 400, error: `Provide valid ${type === "lending" ? "lending" : "borrow"} id related to user` });
+                    // } else {
+                    //     const lendingAmount = type === "lending" ? result[0].lendingAmount : result[0].borrowAmount
+
+                    //     // const checkTotalPaymentQuery = `SELECT SUM(paymentAmount) AS totalPayment FROM paymenthistory WHERE userId = ? AND ${type === "lending" ? "lendId" : "borrowId"} = ? AND status=1`;
+                    //     const checkTotalPaymentQuery = type === "lending" ? userQueries.lendingTotalPaymentQuery : userQueries.borrowTotalPaymentQuery
+                    //     db.query(checkTotalPaymentQuery, lendValues, async (err, result2) => {
+                    //         if (err) {
+                    //             // console.log("🚀 ~ file: userservice.js:924 ~ db.query ~ err:", err)
+                    //             return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+                    //             // return res.status(500).json({ status: 500, error: 'Internal server error' });
+                    //         } else {
+                    //             // console.log("🚀 ~ file: userservice.js:923 ~ db.query ~ result2:", result2)
+                    //             const totalPayment = result2[0].totalPayment || 0
+                    //             if (totalPayment == lendingAmount) {
+                    //                 return returnData(res, 400, ERROR_MESSAGES.SUCCESS.PAYMENTDONE)
+                    //                 // return res.status(400).json({ status: 400, error: 'Payment already made/Completed' });
+                    //             } else if ((totalPayment + paymentAmount) > lendingAmount) {
+                    //                 return returnData(res, 400, `Payment Amount exceeds the ${type === "lending" ? "Lending" : "Borrow"} Amount`)
+                    //                 // return res.status(400).json({ status: 400, error: `Payment Amount exceeds the ${type === "lending" ? "Lending" : "Borrow"} Amount` });
+                    //             } else {
+                    //                 // const sql = type === "lending" ? 'INSERT INTO paymenthistory (userId, lendId, paymentDescription, paymentDate, paymentAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?,?)'
+                    //                 //     : 'INSERT INTO paymenthistory (userId, borrowId, paymentDescription, paymentDate, paymentAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?,?)';
+                    //                 // const lendingPaymentSql = ((totalPayment + paymentAmount) === lendingAmount) ? `UPDATE ${type === "lending" ? "lendigdata" : "borrowingdata"} SET paymentStatus=1 WHERE ${type === "lending" ? "lendId" : "borrowId"}=?`
+                    //                 //     : `UPDATE ${type === "lending" ? "lendigdata" : "borrowingdata"} SET paymentStatus=2 WHERE ${type === "lending" ? "lendId" : "borrowId"}=?`
+
+                    //                 const sql = type === "lending" ? userQueries.insertLendingPaymentQuery : userQueries.insertBorrowPaymentQuery
+                    //                 const lendingPaymentSql = ((totalPayment + paymentAmount) === lendingAmount) ? (type === "lending" ? userQueries.updateLendingPaymentStatus1Query : userQueries.updateBorrowPaymentStatus1Query)
+                    //                     : (type === "lending" ? userQueries.updateLendingPaymentStatus2Query : userQueries.updateBorrowPaymentStatus2Query)
+
+                    //                 const values = [userId, lendingId, paymentDescription, paymentDate, paymentAmount, presenttimestamp, presenttimestamp, 1, lendingId];
+                    //                 addPaymentDetail(`${sql};${lendingPaymentSql}`, values)
+                    //             }
+                    //         }
+                    //     })
+                    // }
+                    // });
                 }
+            }).catch(err => {
+                return serverErrorMsg(res)
             })
+            // db.query(userQueries.isUser, [userId], async (err, result1) => {
+            //     if (err) {
+            //         // console.error('Error inserting user data:', err);
+            //         return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+            //         // return res.status(500).json({ status: 500, error: 'Internal server error' });
+            //     } else {
+            //         if (result1.length < 1) {
+            //             return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
+            //             // return res.status(404).json({ status: 404, error: 'User not Found' });
+            //         } else {
+
+            //             const addPaymentDetail = (sql, values) => {
+            //                 db.query(sql, values, (err, result) => {
+            //                     if (err) {
+            //                         // console.error('Error inserting user data:', err);
+            //                         return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+            //                         // return res.status(500).json({ status: 500, error: 'Internal server error' });
+            //                     } else if (result.affectedRows < 1) {
+            //                         return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
+            //                         // return res.status(400).json({ status: 400, error: 'Provide valid lending id related to user' });
+            //                     } else {
+            //                         return returnData(res, 201, ERROR_MESSAGES.SUCCESS.DATADDED)
+            //                         // return res.status(201).json({ status: 201, message: "Payment Details updated" });
+            //                     }
+            //                 });
+            //             }
+            //             // let islending = type === "lending" ? 'SELECT lendingAmount FROM lendigdata WHERE userID=? AND lendId=? AND status=1'
+            //             //     : 'SELECT borrowAmount FROM borrowingdata WHERE userID=? AND borrowid=? AND status=1'
+            //             const islending = type === "lending" ? userQueries.getLendingAmountQuery : userQueries.getBorrowAmountQuery
+            //             const lendValues = [userId, lendingId];
+            //             db.query(islending, lendValues, (err, result) => {
+            //                 if (err) {
+            //                     // console.error('Error inserting user data:', err);
+            //                     return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+            //                     // return res.status(500).json({ status: 500, error: 'Internal server error' });
+            //                 } else if (result.length < 1) {
+            //                     return returnData(res, 400, ERROR_MESSAGES.ERROR.ENTERVALIDID)
+            //                     // return res.status(400).json({ status: 400, error: `Provide valid ${type === "lending" ? "lending" : "borrow"} id related to user` });
+            //                 } else {
+            //                     const lendingAmount = type === "lending" ? result[0].lendingAmount : result[0].borrowAmount
+
+            //                     // const checkTotalPaymentQuery = `SELECT SUM(paymentAmount) AS totalPayment FROM paymenthistory WHERE userId = ? AND ${type === "lending" ? "lendId" : "borrowId"} = ? AND status=1`;
+            //                     const checkTotalPaymentQuery = type === "lending" ? userQueries.lendingTotalPaymentQuery : userQueries.borrowTotalPaymentQuery
+            //                     db.query(checkTotalPaymentQuery, lendValues, async (err, result2) => {
+            //                         if (err) {
+            //                             // console.log("🚀 ~ file: userservice.js:924 ~ db.query ~ err:", err)
+            //                             return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
+            //                             // return res.status(500).json({ status: 500, error: 'Internal server error' });
+            //                         } else {
+            //                             // console.log("🚀 ~ file: userservice.js:923 ~ db.query ~ result2:", result2)
+            //                             const totalPayment = result2[0].totalPayment || 0
+            //                             if (totalPayment == lendingAmount) {
+            //                                 return returnData(res, 400, ERROR_MESSAGES.SUCCESS.PAYMENTDONE)
+            //                                 // return res.status(400).json({ status: 400, error: 'Payment already made/Completed' });
+            //                             } else if ((totalPayment + paymentAmount) > lendingAmount) {
+            //                                 return returnData(res, 400, `Payment Amount exceeds the ${type === "lending" ? "Lending" : "Borrow"} Amount`)
+            //                                 // return res.status(400).json({ status: 400, error: `Payment Amount exceeds the ${type === "lending" ? "Lending" : "Borrow"} Amount` });
+            //                             } else {
+            //                                 // const sql = type === "lending" ? 'INSERT INTO paymenthistory (userId, lendId, paymentDescription, paymentDate, paymentAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?,?)'
+            //                                 //     : 'INSERT INTO paymenthistory (userId, borrowId, paymentDescription, paymentDate, paymentAmount,createdDate,updatedDate,status) VALUES (?,?,?,?,?,?,?,?)';
+            //                                 // const lendingPaymentSql = ((totalPayment + paymentAmount) === lendingAmount) ? `UPDATE ${type === "lending" ? "lendigdata" : "borrowingdata"} SET paymentStatus=1 WHERE ${type === "lending" ? "lendId" : "borrowId"}=?`
+            //                                 //     : `UPDATE ${type === "lending" ? "lendigdata" : "borrowingdata"} SET paymentStatus=2 WHERE ${type === "lending" ? "lendId" : "borrowId"}=?`
+
+            //                                 const sql = type === "lending" ? userQueries.insertLendingPaymentQuery : userQueries.insertBorrowPaymentQuery
+            //                                 const lendingPaymentSql = ((totalPayment + paymentAmount) === lendingAmount) ? (type === "lending" ? userQueries.updateLendingPaymentStatus1Query : userQueries.updateBorrowPaymentStatus1Query)
+            //                                     : (type === "lending" ? userQueries.updateLendingPaymentStatus2Query : userQueries.updateBorrowPaymentStatus2Query)
+
+            //                                 const values = [userId, lendingId, paymentDescription, paymentDate, paymentAmount, presenttimestamp, presenttimestamp, 1, lendingId];
+            //                                 addPaymentDetail(`${sql};${lendingPaymentSql}`, values)
+            //                             }
+            //                         }
+            //                     })
+            //                 }
+            //             });
+            //         }
+            //     }
+            // })
         } else {
             return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
-            // return res.status(400).send({
-            //     status: 400,
-            //     error: "type is not defined"
-            // })
         }
     } catch (err) {
-        // console.log("🚀 ~ file: userservice.js:705 ~ module.exports.signup= ~ err:===>", err)
-        return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-        // return res.status(500).send({
-        //     status: 500,
-        //     error: "Internal server error"
-        // })
+        return serverErrorMsg(res)
     }
 }
 
@@ -799,18 +872,9 @@ module.exports.deletePaymentDetails = async (req, res) => {
             })
         } else {
             return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
-            // return res.status(400).json({
-            //     status: 400,
-            //     error: "type is not defined"
-            // })
         }
     } catch (err) {
-        // console.log("🚀 ~ file: userservice.js:705 ~ module.exports.signup= ~ err:===>", err)
         return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-        // return res.status(500).json({
-        //     status: 500,
-        //     error: "Internal server error"
-        // })
     }
 }
 
@@ -825,9 +889,7 @@ module.exports.getChartdata = async (req, res) => {
         const getChart = (sql, values) => {
             db.query(sql, values, async (err, result) => {
                 if (err) {
-                    // console.log("🚀 ~ file: userservice.js:1462 ~ db.query ~ err:", err)
                     return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                    // return res.status(500).json({ status: 500, error: `server error` })
                 } else {
                     // console.log("🚀 ~ file: userservice.js:1463 ~ db.query ~ result:", result)
                     // let totalCredit = 0;
@@ -860,15 +922,14 @@ module.exports.getChartdata = async (req, res) => {
             })
         }
 
-        if (monthoryear === "year") {
-            // getChart(`${userQueries.yearCreditChartQuery};${userQueries.yearDebitChartQuery};${userQueries.yearLendingChartQuery};`, [userId, userId, userId])
+        if (monthoryear === "allyear") {
+            getChart(`${userQueries.yearCreditChartQuery};${userQueries.yearDebitChartQuery};`, [userId, userId])
+        } else if (monthoryear === "year") {
             getChart(`${userQueries.monthCreditChartQuery};${userQueries.monthDebitChartQuery};`, [userId, year, userId, year])
         } else if (monthoryear === "month") {
-            // getChart(`${userQueries.monthCreditChartQuery};${userQueries.monthDebitChartQuery};${userQueries.monthLendingChartQuery};`, [userId, year, userId, year, userId, year])
             getChart(`${userQueries.dayCreditChartQuery};${userQueries.dayDebitChartQuery}`, [userId, year, _month, userId, year, _month])
         } else {
             return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
-            // return res.status(400).json({ status: 400, error: `${monthoryear} type is not defined` })
         }
 
     } catch (err) {

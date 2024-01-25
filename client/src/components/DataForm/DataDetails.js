@@ -39,10 +39,10 @@ export const DataDetails = (props) => {
                         <div className="col-md-12 mt-4">
                             {/* <h5 className='text-decoration-underline'>Payment Status</h5> */}
                             <div className="row">
-                                <div className="col-md-6">
+                                {/* <div className="col-md-6">
                                     <p className='mb-2'><span className='text-capitalize'>Total Payment</span> Amount : <strong>{detail?.totalPaymentAmount || ""}</strong></p>
-                                </div>
-                                <div className="col-md-6">
+                                </div> */}
+                                <div className="col-md-12">
                                     <p className='mb-2'><span className='text-capitalize'>Pending</span> Amount : <strong>{detail?.pendingAmount}</strong></p>
                                 </div>
                                 <div className="col-md-6">

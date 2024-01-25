@@ -20,9 +20,9 @@ const userQueries = {
     // update borrow data query
     updateBorrowQuery: 'UPDATE borrowingdata SET description=?,borrowDate=?,borrowAmount=?,updatedDate=? WHERE borrowId=? AND status=1',
     // get the credit data query
-    getCreditQuery: 'SELECT creditId,description,DATE_FORMAT(creditDate, "%Y-%m-%d") AS creditDate,creditAmount,createdDate,updatedDate FROM creditdata WHERE userId=? AND status=1 ORDER BY creditDate DESC',
+    getCreditQuery: 'SELECT creditId,description,DATE_FORMAT(creditDate, "%Y-%m-%d") AS creditDate,creditAmount,createdDate,updatedDate FROM creditdata WHERE userId=? AND status=1 ORDER BY creditDate DESC,creditId DESC',
     // get the debit data query
-    getDebitQuery: 'SELECT debitId,description,DATE_FORMAT(debitDate, "%Y-%m-%d") AS debitDate,debitAmount,createdDate,updatedDate FROM debitdata WHERE userId=? AND status=1 ORDER BY debitDate DESC',
+    getDebitQuery: 'SELECT debitId,description,DATE_FORMAT(debitDate, "%Y-%m-%d") AS debitDate,debitAmount,createdDate,updatedDate FROM debitdata WHERE userId=? AND status=1 ORDER BY debitDate DESC,debitId DESC',
     // get the lending data query
     getLendingQuery: `SELECT ld.lendId, ld.lendingAmount, DATE_FORMAT(ld.lendingDate, "%Y-%m-%d") AS lendingDate,
                             ld.description,ld.paymentStatus, SUM(pt.paymentAmount) AS totalPaymentAmount,
@@ -143,17 +143,19 @@ const userQueries = {
     where userId = ? AND year(lendingDate)=? AND status=1 group by monthname(lendingDate) order by month ASC`,
 
     // to get the balance
-    balanceQuery: `select SUM(creditAmount) - SUM(debitAmount) AS available_balance
-        FROM (
-            SELECT  IFNULL(creditAmount, 0) AS creditAmount, 0 AS debitAmount
-            FROM home_banking.creditdata
-            WHERE userId = ?
-            UNION ALL
-            SELECT 0 AS creditAmount, IFNULL(debitAmount, 0) AS debitAmount
-            FROM home_banking.debitdata
-            WHERE userId = ?
-        ) AS transactions`
+    // balanceQuery: `select SUM(creditAmount) - SUM(debitAmount) AS available_balance
+    //     FROM (
+    //         SELECT  IFNULL(creditAmount, 0) AS creditAmount, 0 AS debitAmount
+    //         FROM home_banking.creditdata
+    //         WHERE userId = ?
+    //         UNION ALL
+    //         SELECT 0 AS creditAmount, IFNULL(debitAmount, 0) AS debitAmount
+    //         FROM home_banking.debitdata
+    //         WHERE userId = ?
+    //     ) AS transactions`
+    balanceQuery: `SELECT SUM(c.creditAmount) - (SELECT SUM(d.debitAmount) FROM home_banking.debitdata d WHERE userId =? AND status=1) as available_balance
+     FROM home_banking.creditdata c WHERE userId =? AND status=1`
 
 }
 
-module.exports = userQueries
+module.exports = userQueries;

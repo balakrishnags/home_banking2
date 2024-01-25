@@ -124,9 +124,8 @@ export const SignIn = () => {
             <div className="mouth">
               <img src={Number(width) > 0 ? Images.bigsmile : Images.smile} alt="smile" className={`img-fluid`} />
             </div>
-
-            {isPasswordFocused && <><div className="blockBox left"></div>
-              <div className="blockBox right"></div></>}
+            <div className={`blockBox blockbox_left ${isPasswordFocused ? "focus" : ""}`}><img src={Images.righthand} alt="hand" className="img-fluid" /></div>
+            <div className={`blockBox blockbox_right ${isPasswordFocused ? "focus" : ""}`}><img src={Images.lefthand} alt="hand" className="img-fluid" /></div>
           </div>
         </div>
         <Form onSubmit={formik.handleSubmit} autoComplete="off">

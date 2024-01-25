@@ -13,7 +13,8 @@ const persistConfig = {
 const trackingConfig = {
   key: 'UIStore',
   storage,
-  blacklist: ['isSidebarOpen', 'screenwidth', 'loader', 'snackbar', 'profileDetail']
+  blacklist: ['isSidebarOpen', 'screenwidth', 'loader', 'snackbar', 'profileDetail',
+    'balance', 'totalUsers']
 };
 
 const combineReduer = combineReducers({

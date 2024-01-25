@@ -67,7 +67,10 @@ export const Header = () => {
         <Container fluid>
           <NavLink id="nav_logo" to={isAuth ? "/" : "/login"} className="d-flex align-items-center text-decoration-none">
             <img src={Images.logo} alt="logo" className="logostyle" />
-            <span className="font_color db_logo ms-2 mb-0">Home Banking</span>
+            <div className="ms-2">
+              <div className="font_color db_logo mb-0">Home Banking</div>
+              <span className="sub_title">Transaction of beliefs</span>
+            </div>
           </NavLink>
           {isAuth &&
             <div className="ms-auto d-flex">
