@@ -45,5 +45,9 @@ export const configUrl = {
     getEnvlist: "/envlist/get",
     addEnvList: "/envlist/add",
     updateEnvList: "/envlist/update/",
-    deleteEnvList: "/envlist/delete/"
+    deleteEnvList: "/envlist/delete/",
+
+    // generate Qr
+    generateQr: '/genqr',
+    verifyQr: '/verifyqr'
 }

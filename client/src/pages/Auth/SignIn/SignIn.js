@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { Input_element } from "../../../components/input_field/Input_element";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAccessToken, setIsAuth, setLoggedInUser, setSnackbar } from "../../../store/reducers/ui.reducer";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
@@ -15,12 +15,15 @@ import { RouteStrings } from "../../../utils/common";
 import { PasswordShowHide } from "../../../components/PasswordShow/PasswordShowHide";
 import { useRef } from "react";
 import { Images } from "../../../utils/images";
+import { QrComponent } from "../../../components/QrComponent/QrComponent";
 
 
 export const SignIn = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  // const { userInfo, sessionScanId } = useSelector(state => state.UIStore)
+  // console.log("🚀 ~ SignIn ~ sessionScanId:", sessionScanId)
   const [isAdmin, setAdmin] = useState(false)
 
   const snackBarContent = (isSuccess, message) => {
@@ -198,6 +201,9 @@ export const SignIn = () => {
           </Link>
         </div>
       </div>
+
+      <h4 className="text-center">-- OR --</h4>
+      <QrComponent scannerView={false} />
     </>
   );
 };

@@ -32,9 +32,9 @@ export const UserPassword = () => {
 
     useEffect(() => {
         const eventSource = new EventSource(`http://localhost:8081/sse/admin`);
-        let list = []
         // Event listener for incoming messages
         eventSource.onmessage = (event) => {
+            console.log("🚀 ~ useEffect ~ event:", event.data)
             getPasswordReqs()
         };
 
@@ -108,7 +108,9 @@ export const UserPassword = () => {
                     <UserDetails snackBarContent={snackBarContent} userDetail={userDetail} setCreateUser={setChange}
                         refreshtable={getPasswordReqs} isChange={false} />
                 </> : <>{userList.length > 0 ?
-                    <CommonTable propColumns={columns} propData={userList} />
+                    <div className="mt-5">
+                        <CommonTable propColumns={columns} propData={userList} />
+                    </div>
                     : <>
                         <h5 className='mt-5'>No Requests Found</h5>
                     </>}

@@ -22,7 +22,9 @@ export const uiReducer = createSlice({
     profileDetail: null,
     balance: null,
     totalUsers: null,
-    isTime: null
+    isTime: null,
+    scannerModal: false,
+    sessionScanId: '',
   },
   reducers: {
     setIsAuth: (state, action) => {
@@ -51,6 +53,12 @@ export const uiReducer = createSlice({
     setEnvData: (state, action) => {
       state.envData = action.payload
     },
+    setScannerModal: (state, action) => {
+      state.scannerModal = action.payload
+    },
+    setSessionScannerId: (state, action) => {
+      state.sessionScanId = action.payload
+    },
     setProfileDetail: (state, action) => {
       state.profileDetail = action.payload
     },
@@ -72,7 +80,7 @@ export const uiReducer = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setIsAuth, setLoader, setExpired, setEnvData, setProfileDetail,
+export const { setIsAuth, setLoader, setExpired, setEnvData, setProfileDetail, setScannerModal, setSessionScannerId,
   setViewSidebar, resetAuth, setAccessToken, setScreenWidth, setSnackbar, setBalance, setTime } = uiReducer.actions;
 
 export default uiReducer.reducer;

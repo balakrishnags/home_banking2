@@ -2,6 +2,7 @@ const authQueries = {
     // signup query
     signUpQuery: 'INSERT INTO users (userName,email,userRole,userDob,gender,userPhoneNumber,userPassword,userRegisteredDate,updatedDate,status) VALUES (?,?,?,?,?,?,?,?,?,?)',
     isUserPresent: 'SELECT * FROM users WHERE email = ? AND status=1',
+    getUserData: 'SELECT * FROM users WHERE userId = ?',
     // metadata QUERY
     isMetaIdExist: 'SELECT metaId FROM metadata WHERE userId=?',
     // update metadata Query for forget password

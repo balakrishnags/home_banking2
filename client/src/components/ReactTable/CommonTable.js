@@ -51,54 +51,56 @@ export const CommonTable = (props) => {
 
     return (
         <>
-            {!isVisible && <div className="mt-4 mb-2 d-flex justify-content-between">
-                <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
-                <div>
-                    <select
-                        id="tablenumber"
-                        value={pageSize}
-                        className="selectTag"
-                        onChange={(e) => setPageSize(Number(e.target.value))}
-                    >
-                        <option value="" disabled>
-                            Select
-                        </option>
-                        {[5, 10, 15, 25, 50].map((pageSize) => (
-                            <option key={pageSize} value={pageSize}>
-                                {pageSize}
+            <div className="pageRowSortNumber">
+                {!isVisible && <div className="d-flex justify-content-end pagerowpos">
+                    {/* <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} /> */}
+                    <div>
+                        <select
+                            id="tablenumber"
+                            value={pageSize}
+                            className="selectTag"
+                            onChange={(e) => setPageSize(Number(e.target.value))}
+                        >
+                            <option value="" disabled>
+                                Select
                             </option>
-                        ))}
-                    </select>
-                </div>
-            </div>}
-            <div className="text-center table_scroll">
-                <table {...getTableProps()}>
-                    <thead>
-                        {headerGroups.map((headerGroup) => (
-                            <tr {...headerGroup.getHeaderGroupProps()}>
-                                {headerGroup.headers.map((column) => (
-                                    <th {...column.getHeaderProps()}>
-                                        {column.render("Header")}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody {...getTableBodyProps()}>
-                        {page.map((row) => {
-                            prepareRow(row);
-                            return (
-                                <tr {...row.getRowProps()}>
-                                    {row.cells.map((cell) => {
-                                        return (
-                                            <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
-                                        );
-                                    })}
+                            {[5, 10, 15, 25, 50].map((pageSize) => (
+                                <option key={pageSize} value={pageSize}>
+                                    {pageSize}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>}
+                <div className="text-center table_scroll">
+                    <table {...getTableProps()}>
+                        <thead>
+                            {headerGroups.map((headerGroup) => (
+                                <tr {...headerGroup.getHeaderGroupProps()}>
+                                    {headerGroup.headers.map((column) => (
+                                        <th {...column.getHeaderProps()}>
+                                            {column.render("Header")}
+                                        </th>
+                                    ))}
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                            ))}
+                        </thead>
+                        <tbody {...getTableBodyProps()}>
+                            {page.map((row) => {
+                                prepareRow(row);
+                                return (
+                                    <tr {...row.getRowProps()}>
+                                        {row.cells.map((cell) => {
+                                            return (
+                                                <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                                            );
+                                        })}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             {!isVisible && <div className="text-center">
                 <TableNavigation pageIndex={pageIndex} gotoPage={gotoPage} previousPage={previousPage}

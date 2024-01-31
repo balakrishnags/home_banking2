@@ -9,9 +9,10 @@ const ERROR_MESSAGES = require("../utils/constants/messages");
 const { presenttimestamp, encryptData, decryptData, returnData, convertToYearFormat, serverErrorMsg } = require("../utils/common");
 const { ENVDATA } = require("../config/config");
 const { usersendMail } = require("../Middleware/mailcredentials");
-// const CONSTFIELDS = require("../utils/constants/constants");
 const { UTILS } = require("../utils/util.index");
 const mySQLInstance = require("../database/classDatabaseConnection");
+
+const QRCode = require("qrcode")
 
 // get userlogData
 function extractBrowserFromUserAgent(userAgent) {
@@ -19,108 +20,17 @@ function extractBrowserFromUserAgent(userAgent) {
     const match = userAgent.match(regex);
     return match ? match[0] : 'Unknown';
 }
+
 // for the forget passwords events
 const userUpdateSubscribers = [];
-// console.log("🚀 ~ file: authServices.js:22 ~ userUpdateSubscribers:", userUpdateSubscribers)
-
+// for the qrscan event
+const userscanEvent = [];
 // for the update after password change
 const updatePaswordEvent = [];
-
 // for the update of details of the users
 const updateUserDetailEvent = [];
 
 
-
-// signup
-// module.exports.signup = (CONTROLLERS) => async (req, res) => {
-//     try {
-//         const { userName, email, userRole, userDob, gender, userPhoneNumber, userPassword } = req.body
-
-//         let genderGroup = Object.values(UTILS.CONSTANTS.CONSTFIELDS.GENDERFIELD)
-//         if (!genderGroup.includes(gender.toLowerCase().trim())) {
-//             return returnData(res, 409, ERROR_MESSAGES.ERROR.GENDERERROR)
-//             // return res.status(409).json({ status: 409, Error: "" })
-//         }
-
-//         if (!(RegEx.phone__regEx.test(userPhoneNumber))) {
-//             return returnData(res, 409, ERROR_MESSAGES.ERROR.VALIDPHONE)
-//             // res.status(409).json({ status: 409, Error: "Enter valid Phone Number" })
-//         }
-
-//         let _userDob = moment(new Date(userDob)).format('YYYY-MM-DD')
-//         bcrypt.hash(userPassword, 9, async (err, hash) => {
-//             if (err) {
-//                 // console.log("🚀 ~ file: authServices.js:43 ~ bcrypt.hash ~ err:", err)
-//                 return serverErrorMsg(res)
-//                 // return res.status(500).send({
-//                 //     status: 500,
-//                 //     error: "user Registration failed"
-//                 // })
-//             } else {
-//                 // const sql = 'INSERT INTO users (userName,email,userRole,userDob,gender,userPhoneNumber,userPassword,userRegisteredDate,updatedDate,status) VALUES (?,?,?,?,?,?,?,?,?,?)';
-
-//                 const values = [userName, email, userRole, _userDob, gender, userPhoneNumber, hash, presenttimestamp, presenttimestamp, 1];
-
-//                 db.query(authQueries.signUpQuery, values, async (err, result) => {
-//                     if (err && err.code === 'ER_DUP_ENTRY') {
-//                         return returnData(res, 400, ERROR_MESSAGES.ERROR.SERVER)
-//                         // return res.status(400).json({ status: 400, error: 'email already exists' });
-//                     }
-//                     if (err) {
-//                         // console.error('Error inserting user data:====>', err);
-//                         return serverErrorMsg(res)
-//                         // return res.status(500).json({ status: 500, error: 'User registration failed' });
-//                     }
-//                     // console.log('User registered successfully');
-//                     // return res.status(201).json({ status: 201, message: 'User registered successfully' });
-
-//                     let subject = CONTROLLERS.EMAIL_CONTROLLER.EMAIL.SIGNUP_SUBJECT
-//                     let html = CONTROLLERS.EMAIL_CONTROLLER.EMAIL.SIGNUP_TEMPLATE(email, userPassword)
-
-//                     try {
-//                         const response = await usersendMail(email, subject, "", html)
-//                         // console.log("🚀 ~ file: authServices.js:206 ~ db.query ~ response:", response)
-//                         return returnData(res, 201, ERROR_MESSAGES.SUCCESS.USERREGISTERED)
-//                     } catch (err) {
-//                         // console.log("🚀 ~ file: authServices.js:208 ~ db.query ~ err:", err)
-//                         return returnData(res, 500, ERROR_MESSAGES.ERROR.MAILSENTERROR)
-//                     }
-
-
-//                     // const mailOptions = {
-//                     //     from: 'balakrishna.g@dollarbirdinc.com',
-//                     //     to: `${email}`,
-//                     //     subject: "User Registration",
-//                     //     html: `<div>
-//                     //             <h5>Welcome to Home Banking Portal</h5>
-//                     //             <p>You are successfully registered to the home banking portal, Your Account credentials listed below,
-//                     //             <p className="mb-1">Email: ${email}</p>
-//                     //             <p>Password: ${userPassword}</p>
-//                     //             <p>Click the link to login: <a href="http://localhost:3000/login">http://localhost:3000/login</a></p>
-//                     //         </div>`
-//                     // };
-
-//                     // resetPasswordMail.sendMail(mailOptions, (err, result) => {
-//                     //     if (err) {
-//                     //         // console.log("🚀 ~ file: userservice.js:730 ~ resetPasswordMail.sendMail ~ err:", err)
-//                     //         return res.status(500).json({ status: 500, error: 'Internal Server error' });
-//                     //     }
-
-//                     //     res.status(201).json({ satatus: 201, message: 'User registered successfully, Account Credentials sent to the user through Email' });
-//                     // });
-
-//                 });
-//             }
-//         })
-//     } catch (err) {
-//         // console.log("🚀 ~ file: authServices.js:88 ~ module.exports.signup= ~ err:", err)
-//         return serverErrorMsg(res)
-//         // return res.status(500).send({
-//         //     status: 500,
-//         //     error: "user Registration failed"
-//         // })
-//     }
-// }
 
 // signup
 module.exports.signup = (CONTROLLERS) => async (req, res) => {
@@ -313,105 +223,6 @@ module.exports.signin = async (req, res) => {
     }
 }
 
-// // forgot password for the admins
-// module.exports.forgotpassword = (CONTROLLERS) => async (req, res) => {
-//     try {
-//         const { email } = req.body;
-
-//         if (email) {
-//             // const query = 'SELECT * FROM users WHERE email = ? AND status=1'
-//             db.query(authQueries.isUserPresent, [email], async (err, results) => {
-//                 if (err) {
-//                     // console.error('Error querying the database:', err);
-//                     return serverErrorMsg(res)
-//                     // return res.status(500).json({ status: 500, error: 'Internal server error' });
-//                 }
-
-//                 if (results.length === 0) {
-//                     return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
-//                     // return res.status(404).json({ status: 404, error: 'User not Found' });
-//                 }
-
-//                 const user = results[0];
-
-//                 if (user.userRole == 1) {
-//                     let resetString = JSON.stringify({ email: user.email, userId: user.userId })
-//                     const encryptedData = encryptData(resetString);
-
-//                     var token = jwt.sign(
-//                         { encryptedData }, ENVDATA.jwtsecretkey, { expiresIn: ENVDATA.forgottokenexpiry });
-
-
-//                     let subject = CONTROLLERS.EMAIL_CONTROLLER.EMAIL.RESET_SUBJECT
-//                     let text = CONTROLLERS.EMAIL_CONTROLLER.EMAIL.RESET_TEMPLATE(ENVDATA.forgetPasswordlink, token)
-
-//                     try {
-//                         const response = await usersendMail(email, subject, text)
-//                         // console.log("🚀 ~ file: authServices.js:206 ~ db.query ~ response:", response)
-//                         return returnData(res, 200, ERROR_MESSAGES.SUCCESS.FORGETTOKENGENERATED)
-//                     } catch (err) {
-//                         // console.log("🚀 ~ file: authServices.js:208 ~ db.query ~ err:", err)
-//                         return returnData(res, 500, ERROR_MESSAGES.ERROR.MAILSENTERROR)
-//                     }
-
-//                     // const mailOptions = {
-//                     //     from: 'balakrishna.g@dollarbirdinc.com',
-//                     //     to: `${email}`,
-//                     //     subject: "Reset Password",
-//                     //     text: `Click the link to reset Password http://localhost:3000/resetpassword?token=${token}`,
-//                     // };
-
-//                     // resetPasswordMail.sendMail(mailOptions, (err, result) => {
-//                     //     if (err) {
-//                     //         console.log("🚀 ~ file: authServices.js:215 ~ resetPasswordMail.sendMail ~ err:", err)
-//                     //         return res.status(500).json({ status: 500, error: 'Internal Server error' });
-//                     //     }
-
-//                     //     res.status(200).json({ satatus: 200, message: 'Email sent to Your email id, please check your Email' });
-//                     // });
-//                 } else {
-//                     // const metaQuery = "SELECT metaId FROM metadata WHERE userId=?"
-//                     // const requestForgotSql = 'UPDATE metadata SET isForgetPass=?,updatedDate=? WHERE userId=?'
-//                     // const addSql = "INSERT INTO metadata(userId,isForgetPass,createdDate,updatedDate,isChangePass) VALUES (?,?,?,?,?)"
-
-//                     db.query(authQueries.isMetaIdExist, [user.userId], async (err, result2) => {
-//                         if (err) {
-//                             // console.error('Error querying the database:', err);
-//                             return serverErrorMsg(res)
-//                             // return res.status(500).json({ status: 500, error: 'Internal server error' });
-//                         }
-//                         const sql = result2.length > 0 ? authQueries.updateMetadataForgetQuery : authQueries.insertMetadataForgetQuery
-//                         let requsetValues = result2.length > 0 ? [1, presenttimestamp, user.userId] : [user.userId, 1, presenttimestamp, presenttimestamp, 0]
-
-//                         db.query(sql, requsetValues, async (err, result) => {
-//                             if (err) {
-//                                 // console.log("🚀 ~ file: userservice.js:468 ~ db.query ~ err:", err)
-//                                 return serverErrorMsg(res)
-//                                 // return res.status(500).json({ status: 500, error: "Internal server error" })
-//                             }
-//                             const userUpdate = { message: 'User forget password flag updated', email };
-//                             userUpdateSubscribers.forEach((sendUpdate) => {
-//                                 sendUpdate(userUpdate);
-//                             });
-
-//                             return returnData(res, 200, ERROR_MESSAGES.SUCCESS.FORGETPASSWORDNOTIFY, { roleId: user.userRole })
-//                             // return res.status(200).json({ status: 200, message: "When the password is changed, you will be notified by email.", data: { roleId: user.userRole } })
-//                         })
-//                     })
-//                 }
-//             });
-//         } else {
-//             return returnData(res, 404, ERROR_MESSAGES.ERROR.VALIDEMAIL)
-//             // res.status(404).send({
-//             //     status: 404,
-//             //     message: "Please enter valid email"
-//             // })
-//         }
-//     } catch (err) {
-//         return serverErrorMsg(res)
-//         // return res.status(500).json({ status: 500, error: 'Internal server Error' });
-//     }
-// }
 
 module.exports.forgotpassword = (CONTROLLERS) => async (req, res) => {
     try {
@@ -492,41 +303,6 @@ module.exports.forgotpassword = (CONTROLLERS) => async (req, res) => {
 }
 
 
-
-//get the forget or change password requests
-// module.exports.getForgetPassRequests = async (req, res) => {
-//     try {
-//         const { result } = req.decodedToken
-//         if (result[0].userRole === 1) {
-//             // const sql2 = "SELECT m.userId,m.isForgetPass,m.isChangePass,m.updatedDate,u.userName,u.email,u.gender,u.userDob,u.userRole,u.userPhoneNumber FROM metadata m JOIN users u ON m.userId = u.userId WHERE (m.isForgetPass = 1 OR m.isChangePass = 1) AND u.status=1 ORDER BY m.updatedDate DESC"
-//             // const sql = "SELECT metaId,userId,createdDate,updatedDate,isForgetPass,isChangePass FROM metaData WHERE isForgetPass=1 OR isChangePass=1 ORDER BY updatedDate DESC"
-//             db.query(authQueries.forgetpasswordlistQuery, async (err, result) => {
-//                 if (err) {
-//                     // console.log("🚀 ~ file: userservice.js:1349 ~ db.query ~ err:", err)
-//                     return serverErrorMsg(res)
-//                     // return res.status(500).json({ status: 500, error: "Internal server error" })
-//                 }
-//                 if (result.length < 1) {
-//                     return returnData(res, 404, ERROR_MESSAGES.ERROR.NODATAFOUND)
-//                     // return res.status(404).json({ status: 404, error: "No Data Found" })
-//                 }
-//                 // console.log("🚀 ~ file: userservice.js:508 ~ db.query ~ result:", result)
-
-//                 return returnData(res, 200, ERROR_MESSAGES.SUCCESS.DATAFOUND, result)
-//                 // return res.status(200).json({ status: 200, message: "Data Found", data: result })
-//             })
-
-//         } else {
-//             return returnData(res, 401, ERROR_MESSAGES.ERROR.UNAUTHORIZED)
-//             // return res.status(401).json({ status: 401, error: "Unauthorized" })
-//         }
-//     } catch (err) {
-//         // console.log("🚀 ~ file: userservice.js:1347 ~ module.exports.getForgetPassRequests= ~ err:", err)
-//         return serverErrorMsg(res)
-//         // return res.status(500).json({ status: 500, error: "Internal server error" })
-//     }
-// }
-
 //get the forget or change password requests
 module.exports.getForgetPassRequests = async (req, res) => {
     try {
@@ -556,49 +332,6 @@ module.exports.getForgetPassRequests = async (req, res) => {
     }
 }
 
-
-// Reset Password
-// module.exports.resetpassword = async (req, res) => {
-//     try {
-//         const { newpassword, confirmpassword } = req.body;
-//         const { token } = req.params
-
-//         if (newpassword == confirmpassword) {
-//             bcrypt.hash(newpassword, 9, async (err, hash) => {
-//                 if (err) {
-//                     // console.log("🚀 ~ file: userservice.js:436 ~ bcrypt.hash ~ err:", err)
-//                     return serverErrorMsg(res)
-//                     // return res.status(500).json({ status: 500, err: "Internal server error" })
-//                 }
-//                 let data = await jwt.verify(token, ENVDATA.jwtsecretkey);
-//                 let isUser = JSON.parse(decryptData(data.encryptedData))
-
-//                 // const passsql = `UPDATE users SET userPassword=?,updatedDate=? WHERE userId=?`;
-//                 db.query(authQueries.resetPassSql, [hash, presenttimestamp, isUser.userId], (err, result) => {
-//                     if (err) {
-//                         // console.log("🚀 ~ file: userservice.js:105 ~ db.query ~ err:", err)
-//                         return serverErrorMsg(res)
-//                         // return res.status(500).json({ status: 500, error: 'Internal Server Error' });
-//                     }
-//                     return returnData(res, 200, ERROR_MESSAGES.SUCCESS.RESETPASS)
-//                     // return res.status(200).json({ status: 200, message: 'Password Resetted successfully' });
-//                 });
-//             })
-//         } else {
-//             return returnData(res, 409, ERROR_MESSAGES.ERROR.NEWANDCONFIRM)
-//             // return res.status(409).json({
-//             //     status: 409,
-//             //     message: "New password and Confirm password should be same"
-//             // })
-//         }
-//     } catch (err) {
-//         return returnData(res, 401, ERROR_MESSAGES.ERROR.RESETTOKENEXPIRED)
-//         // return res.status(401).send({
-//         //     status: 401,
-//         //     error: "Reset Token expired"
-//         // })
-//     }
-// }
 
 // Reset Password for the users by the 
 module.exports.resetpassword = async (req, res) => {
@@ -857,6 +590,30 @@ module.exports.updateDetailById = (CONTROLLERS) => async (req, res) => {
     }
 }
 
+// event trigger for the request for qrscan login
+module.exports.updateScannerEvent = (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    // Function to send data to the admin
+    const sendUpdate = (data) => {
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
+
+    // Add the admin's response stream to the list
+    userscanEvent.push(sendUpdate);
+
+    // Handle connection closure
+    res.on('close', () => {
+        // Remove the admin's response stream when they disconnect
+        const index = userscanEvent.indexOf(sendUpdate);
+        // console.log("🚀 ~ file: authServices.js:673 ~ res.on ~ index:", index)
+        if (index !== -1) {
+            userscanEvent.splice(index, 1);
+        }
+    });
+}
 // event trigger for the request forget password
 module.exports.adminForgetEvent = (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
@@ -920,4 +677,98 @@ module.exports.updatePasswordEvent = (req, res) => {
             updatePaswordEvent.splice(index, 1)
         }
     })
+}
+
+
+// generate the Qr code
+
+const sessions = {}
+const generateSessionId = () => {
+    return Math.random().toString(36).substr(2, 10);
+}
+
+module.exports.generateQRCode = async (req, res) => {
+    try {
+        console.log("ENVDATA.jwtsecretkey", ENVDATA.jwtsecretkey)
+
+        let sessionId = generateSessionId()
+
+        sessions[sessionId] = { verified: false, timestamp: presenttimestamp };
+
+        console.log("🚀 ~ module.exports.generateQRCode= ~ sessions:", sessions)
+
+        let data = {
+            jwtkey: ENVDATA.jwtsecretkey,
+            // website: 'homeBanking',
+            time: presenttimestamp,
+            sessionId: sessionId
+        }
+
+        let _data = encryptData(JSON.stringify(data))
+        // console.log("🚀 ~ module.exports.generateQRCode= ~ _data:", _data)
+
+        QRCode.toDataURL(_data, async (err, url) => {
+            if (err) {
+                console.log("qrerror", err)
+                return serverErrorMsg()
+            }
+            let data = { url: url, sessionId: sessionId }
+            return returnData(res, 200, "Qr generated", data)
+            // console.log("url", url)
+        })
+
+    } catch (err) {
+        console.log("err", err)
+    }
+}
+
+module.exports.verifyQrCode = async (req, res, next) => {
+    const { qrcode, userId, seesionId } = req.body
+    // console.log("🚀 ~ module.exports.verifyQrCode= ~ userId:", userId)
+    // console.log("🚀 ~ module.exports.verifyQrCode= ~ qrcode:", qrcode)
+    try {
+
+        let data = JSON.parse(decryptData(qrcode))
+        // console.log("🚀 ~ module.exports.verifyQrCode= ~ data:", data.sessionId)
+        const session = sessions[data.sessionId]
+        // console.log("🚀 ~ module.exports.verifyQrCode= ~ sessions:", sessions)
+        // console.log("🚀 ~ module.exports.verifyQrCode= ~ session:", session)
+        // console.log("🚀 ~ module.exports.verifyQrCode= ~ session:", session)
+        // if (session) {
+        if (userId) {
+            await mySQLInstance.executeQuery(authQueries.getUserData, [userId]).then((result) => {
+                // console.log("🚀 ~ mySQLInstance.executeQuery ~ result:", result)
+                let user = result[0]
+                // console.log("🚀 ~ awaitmySQLInstance.executeQuery ~ user:", user)
+                const userDataString = JSON.stringify({ email: user.email, roleId: user.userRole });
+                const encryptedData = encryptData(userDataString);
+                // token generated
+                var token = jwt.sign(
+                    { encryptedData }, ENVDATA.jwtsecretkey, { expiresIn: ENVDATA.accesstokenexpiry });
+
+                // refresh token for regenerating the token
+                var refereshtoken = jwt.sign(
+                    { encryptedData }, ENVDATA.jwtsecretkey, { expiresIn: ENVDATA.refreshtokenexpiry });
+
+                let _data = { sessionId: data.sessionId, token: token, refreshtoken: refereshtoken, email: user.email, roleId: user.userRole, userId: user.userId }
+                userscanEvent.forEach((sendUpdate) => {
+                    sendUpdate(_data);
+                });
+                return returnData(res, 200, ERROR_MESSAGES.SUCCESS.LOGIN)
+
+            }).catch(err => {
+                console.log("🚀 ~ mySQLInstance.executeQuery ~ err:", err)
+                return serverErrorMsg()
+            })
+        } else {
+            return serverErrorMsg()
+        }
+
+        // }
+
+        // let _data = { token: token, refreshtoken: refereshtoken, email: user.email, roleId: user.userRole, userId: user.userId }
+
+    } catch (err) {
+        return serverErrorMsg()
+    }
 }

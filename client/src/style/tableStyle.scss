@@ -192,3 +192,11 @@ table td {
 .word_wrap {
   word-break: break-word;
 }
+.pageRowSortNumber {
+  position: relative;
+  .pagerowpos {
+    position: absolute;
+    top: -35px;
+    right: 0;
+  }
+}

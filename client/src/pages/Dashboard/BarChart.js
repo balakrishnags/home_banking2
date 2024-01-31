@@ -28,6 +28,13 @@ export const BarChart = (props) => {
             chart: {
                 type: 'bar',
             },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        orientation: 'horizontal'
+                    }
+                },
+            },
             xaxis: {
                 title: {
                     text: 'Month',
@@ -44,15 +51,14 @@ export const BarChart = (props) => {
                 name: 'Amount',
                 data: [],
             },
-        ],
+        ]
     });
+
 
     useEffect(() => {
         // Fetch data from the API
         const fetchData = async () => {
             try {
-                // let _dataCategories = type === "year" ? data.map(item => item.year) : monthList
-                // let _dataSeries = type === "year" ? data.map(item => item.totalAmount) : monthDataList(data)
                 let _dataCategories = type === "year" ? monthList : (type === "allyear" ? data.map(item => item.year) : dayList)
                 let _dataSeries = type === "year" ? monthDataList(data) : (type === "allyear" ? data.map(item => item.totalAmount) : dayDataList(data))
 
@@ -60,6 +66,13 @@ export const BarChart = (props) => {
                 setChartData({
                     options: {
                         ...chartData.options,
+                        plotOptions: {
+                            bar: {
+                                dataLabels: {
+                                    orientation: type === "allyear" ? 'horizontal' : 'vertical'
+                                }
+                            },
+                        },
                         xaxis: {
                             ...chartData.options.xaxis,
                             title: type,
@@ -71,7 +84,7 @@ export const BarChart = (props) => {
                             ...chartData.series[0],
                             data: _dataSeries,
                         },
-                    ],
+                    ]
                 });
             } catch (error) {
                 console.log('Error fetching data:', error);

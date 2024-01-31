@@ -36,12 +36,16 @@ module.exports = {
             USER_DETAILS_BY_ID: "/detailsbyid/:userId",
             DELETE_USER: "/deletebyid/:userId",
             UPDATE_USER: "/updateDetailbyid/:userId",
-            GET_FORGOT_PASSWORD_LIST: "/reqpasswordlist"
+            GET_FORGOT_PASSWORD_LIST: "/reqpasswordlist",
+            GENERATE_QR: "/genqr",
+            VERIFY_QR: "/verifyqr"
         },
         SSEVENTS: {
             GET_PASSWORD_EVENT: "/sse/admin",
+            GET_PASSWORD_EVENT1: "/sse/admin1",
             UPDATE_PASSWORD_EVENT: "/sse/updatePasswordEvent",
-            UPDATE_DETAILS_EVENT: "/sse/updateUserDetailsEvent"
+            UPDATE_DETAILS_EVENT: "/sse/updateUserDetailsEvent",
+            QR_SCAN_EVENT: "/sse/verifyQrscan"
         },
         USER: {
             CREATE_ROLE: "/createrole",

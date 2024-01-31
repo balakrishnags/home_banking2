@@ -5,7 +5,7 @@ import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { resetAuth, setViewSidebar } from "../../store/reducers/ui.reducer";
+import { resetAuth, setScannerModal, setViewSidebar } from "../../store/reducers/ui.reducer";
 import "./header.scss";
 import { Images } from "../../utils/images";
 import { RouteStrings } from "../../utils/common";
@@ -87,6 +87,10 @@ export const Header = () => {
                     <div id="basic-nav-dropdown" className="dprdwn">
                       <div>
                         <NavLink id="profile_link" className="prof_link" to={RouteStrings.userprofile} onClick={() => setDropdown(false)}>Profile</NavLink>
+                        <p className="prof_link" onClick={() => {
+                          setDropdown(false)
+                          dispatch(setScannerModal(true))
+                        }}>Scan QR Code</p>
                         <p id="logout_link" className="prof_link" onClick={logout}>Logout</p>
                       </div>
                     </div>

@@ -127,7 +127,9 @@ export const Users = () => {
                         <CreateUser data={userDetail} snackBarContent={snackBarContent} isEditUser={isEditUser}
                             setCreateUser={setCreateUser} refreshtable={getUsers} />}
                 </> : <>
-                    <CommonTable propColumns={columns} propData={userList} />
+                    <div className='mt-5'>
+                        <CommonTable propColumns={columns} propData={userList} />
+                    </div>
                 </>}
             </div>
         </>

@@ -15,6 +15,7 @@ export const CommonCreditScreen = (props) => {
     const { getRequest } = PostRequestHook()
 
     const [creditList, setCreditList] = useState([])
+    const [filterCreditList, setFilterCreditList] = useState([])
     const [creditDetail, setCreditDetail] = useState({})
     const [isCreateCredit, setCreateCredit] = useState(false)
     const [isEditCredit, setEditCredit] = useState(false)
@@ -27,13 +28,14 @@ export const CommonCreditScreen = (props) => {
 
     useEffect(() => {
         getCredits()
+        getAvailableBalance()
     }, [])
 
     // get userslist
     const getCredits = async () => {
         let response = await getRequest(`${configUrl.getcreditdebit}${type}/${userDetail.userId}`)
         setCreditList(response?.data?.data || [])
-        getAvailableBalance()
+        setFilterCreditList(response?.data?.data || [])
     }
 
     const getAvailableBalance = async () => {
@@ -84,14 +86,6 @@ export const CommonCreditScreen = (props) => {
                                                 creditId: tableProps.cell.row.original.debitId,
                                                 creditDate: tableProps.cell.row.original.debitDate,
                                                 creditAmount: tableProps.cell.row.original.debitAmount,
-                                                description: tableProps.cell.row.original.description
-                                            }
-                                        } else if (type === "lending") {
-                                            data = {
-                                                ...tableProps.cell.row.original,
-                                                creditId: tableProps.cell.row.original.lendId,
-                                                creditDate: tableProps.cell.row.original.lendingDate,
-                                                creditAmount: tableProps.cell.row.original.lendingAmount,
                                                 description: tableProps.cell.row.original.description
                                             }
                                         }
@@ -160,16 +154,7 @@ export const CommonCreditScreen = (props) => {
                                     className="editIcon"
                                     onClick={() => {
                                         let data = {};
-                                        if (type === "credit") {
-                                            data = tableProps.cell.row.original
-                                        } else if (type === "debit") {
-                                            data = {
-                                                creditId: tableProps.cell.row.original.debitId,
-                                                creditDate: tableProps.cell.row.original.debitDate,
-                                                creditAmount: tableProps.cell.row.original.debitAmount,
-                                                description: tableProps.cell.row.original.description
-                                            }
-                                        } else if (type === "lending") {
+                                        if (type === "lending") {
                                             data = {
                                                 ...tableProps.cell.row.original,
                                                 creditId: tableProps.cell.row.original.lendId,
@@ -198,6 +183,57 @@ export const CommonCreditScreen = (props) => {
             },
         ], []
     );
+
+    const [selectedFilter, setSelectedFilter] = useState('');
+    const [filterValue, setFilterValue] = useState('');
+    const [filterDate, setFilterDate] = useState({ start: '', end: '' });
+
+    const handleFilterValues = (e) => {
+        setFilterValue(e)
+        if (e) {
+            let data = creditList.filter(item =>
+                selectedFilter === 'amount' ?
+                    (type === "credit" ? item.creditAmount.toString().includes(e) : (type === "debit" ? item.debitAmount.toString().includes(e)
+                        : (type === "borrow" ? item.borrowAmount.toString().includes(e) : item.lendingAmount.toString().includes(e))))
+                    : item.description.toLowerCase().includes(e.toLowerCase())
+            )
+            setFilterCreditList(data)
+        } else {
+            setFilterCreditList(creditList)
+        }
+    }
+
+    const handleFilterDate = (date, dateType) => {
+        if (dateType == 'start') {
+            setFilterDate({ ...filterDate, start: date })
+        } else {
+            setFilterDate({ ...filterDate, end: date })
+        }
+    }
+
+    useEffect(() => {
+        if (selectedFilter === 'date') {
+            const filteredData = filterDataByDate(creditList, filterDate.start, filterDate.end, type)
+            console.log("🚀 ~ useEffect ~ filteredData:", filteredData)
+            setFilterCreditList(filteredData)
+        }
+    }, [filterDate])
+
+    const filterDataByDate = (data, fromDate, toDate, datetype) => {
+        return data.filter(item => {
+            const date = new Date(item[`${datetype}Date`]);
+
+            if (fromDate && toDate) {
+                return date >= new Date(fromDate) && date <= new Date(toDate);
+            } else if (fromDate) {
+                return date >= new Date(fromDate);
+            } else if (toDate) {
+                return date <= new Date(toDate);
+            }
+
+            return true;
+        });
+    }
 
     return (
         <>
@@ -234,7 +270,63 @@ export const CommonCreditScreen = (props) => {
                         </> :
                             <DataForm formData={creditDetail} type={type} snackBarContent={snackBarContent} refreshtable={getCredits}
                                 setCreateData={setCreateCredit} isUpdate={isEditCredit} userId={userDetail.userId} />}
-                    </> : <CommonTable propColumns={(type == "lending" || type == "borrow") ? _columns : columns} propData={creditList} />}
+                    </> :
+                    <>
+                        <div className="mt-4 mb-2">
+                            {selectedFilter !== 'date' && <p className="mb-2">
+                                Filter By
+                            </p>}
+                            <div className='row'>
+                                <div className="col-md-3">
+                                    <div>
+                                        {selectedFilter === 'date' && <p className="mb-2">
+                                            Filter By
+                                        </p>}
+                                        <select name="filter" id="filter" className='form-select'
+                                            value={selectedFilter}
+                                            onChange={(e) => {
+                                                setSelectedFilter(e.target.value)
+                                                setFilterValue('')
+                                                handleFilterValues('')
+                                                setFilterDate({ start: '', end: '' })
+                                            }}>
+                                            <option value="" selected>Select</option>
+                                            <option value="amount" >Amount</option>
+                                            <option value="description">Description</option>
+                                            <option value="date" className='text-capitalize'>{type} Date</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    {selectedFilter === 'amount' ? <>
+                                        <input type="number" value={filterValue} className='form-control'
+                                            placeholder='Enter Amount' onChange={(e) => handleFilterValues(e.target.value)} />
+                                    </> : selectedFilter === "description" ? <>
+                                        <input type="text" value={filterValue} className='form-control'
+                                            placeholder='Enter text' onChange={(e) => handleFilterValues(e.target.value)} />
+                                    </> :
+                                        <>{selectedFilter === "date" && <>
+                                            <div className='row'>
+                                                <div className='col-6'>
+                                                    <label className='mb-2'>From Date</label>
+                                                    <input type="date" className='form-control' max={filterDate.end}
+                                                        value={filterDate.start} onChange={(e) => handleFilterDate(e.target.value, 'start')} />
+                                                </div>
+                                                <div className='col-6'>
+                                                    <label className="mb-2">To Date</label>
+                                                    <input type="date" className='form-control' min={filterDate.start}
+                                                        value={filterDate.end} onChange={(e) => handleFilterDate(e.target.value, 'end')} />
+                                                </div>
+                                            </div>
+                                            {/* <input type="date" className='form-control'
+                                            placeholder='Enter text' onChange={(e) => handleFilterValues(e.target.value)} /> */}
+                                        </>}
+                                        </>}
+                                </div>
+                            </div>
+                        </div>
+                        <CommonTable propColumns={(type == "lending" || type == "borrow") ? _columns : columns} propData={filterCreditList} />
+                    </>}
             </div>
         </>
     )

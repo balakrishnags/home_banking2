@@ -5,15 +5,17 @@ import { Header } from "./components/Header/Header";
 import { UpdatePassword } from "./pages/Auth/UpdatePassword/UpdatePassword";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { resetAuth, setExpired, setSnackbar } from "./store/reducers/ui.reducer";
+import { resetAuth, setExpired, setScannerModal, setSnackbar } from "./store/reducers/ui.reducer";
 import { ENVDATA } from "./Conflict/Conflct";
 import { Spinner } from "./components/Spinner/Spinner";
 import { LogoutModal } from "./components/LogoutModal/LogoutModal";
 import { RouteStrings } from "./utils/common";
 import { SnackBar } from "./components/SnackBars/SnackBar";
+import { QrComponent } from "./components/QrComponent/QrComponent";
+import { ModalComponent } from "./components/modal/ModalComponent";
 
 function App() {
-  const { userInfo, loader, isExpired, snackbar } = useSelector((state) => state.UIStore);
+  const { userInfo, loader, isExpired, snackbar, scannerModal } = useSelector((state) => state.UIStore);
 
   // let show = (role !== "super_admin" && isAuthenticate == 0)
   const navigate = useNavigate()
@@ -37,12 +39,20 @@ function App() {
       <div>
         <RouteCheck />
       </div>
+
       {/* <UpdatePassword updateModal={show} handleClick={handleUpdateModal} /> */}
       <Spinner spin={loader} />
 
       {/* <LogoutModal logoutModal={isExpired} handleLogout={handleLogoutModal} /> */}
       <SnackBar snackbarOpen={snackbar.isOpen} handleClose={handlesnackClose} message={snackbar.message}
         snackbg={snackbar.isSuccess} />
+
+      {/* // scanner modal  */}
+      <ModalComponent show={scannerModal} onHide={() => { dispatch(setScannerModal(false)) }} modal_header={"Scan QR code"} modal_body={
+        <>
+          <QrComponent scannerView={scannerModal} />
+        </>
+      } />
     </div>
   );
 }
