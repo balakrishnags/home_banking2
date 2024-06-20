@@ -6,6 +6,7 @@ import { PostRequestHook } from '../../apis/Services'
 import { UserDetails } from './UserDetails'
 import { useDispatch } from 'react-redux'
 import { setSnackbar } from '../../store/reducers/ui.reducer'
+import { ENVDATA } from '../../Conflict/Conflct'
 
 export const UserPassword = () => {
     const dispatch = useDispatch()
@@ -31,10 +32,10 @@ export const UserPassword = () => {
     }
 
     useEffect(() => {
-        const eventSource = new EventSource(`http://localhost:8081/sse/admin`);
+        const eventSource = new EventSource(`${ENVDATA.baseUrl}/sse/admin`);
         // Event listener for incoming messages
         eventSource.onmessage = (event) => {
-            console.log("🚀 ~ useEffect ~ event:", event.data)
+            // console.log("🚀 ~ useEffect ~ event:", event.data)
             getPasswordReqs()
         };
 

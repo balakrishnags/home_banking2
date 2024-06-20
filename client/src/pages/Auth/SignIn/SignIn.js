@@ -131,7 +131,7 @@ export const SignIn = () => {
             <div className={`blockBox blockbox_right ${isPasswordFocused ? "focus" : ""}`}><img src={Images.lefthand} alt="hand" className="img-fluid" /></div>
           </div>
         </div>
-        <Form onSubmit={formik.handleSubmit} autoComplete="off">
+        <Form onSubmit={formik.handleSubmit}>
           <div className="mb-4">
             <label htmlFor="userInput" className="text-light mb-2">Email Address</label>
             <input type="email" name="email" id="userInput"

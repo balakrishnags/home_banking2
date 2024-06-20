@@ -163,58 +163,6 @@ module.exports.signin = async (req, res) => {
             }).catch(err => {
                 return serverErrorMsg(res)
             })
-            // db.query(query, [email], (err, results) => {
-            //     if (err) {
-            //         return serverErrorMsg(res)
-            //     } else if (results.length === 0) {
-            //         return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
-            //     } else {
-            //         const user = results[0];
-            //         bcrypt.compare(password, user.userPassword, (bcryptErr, isPasswordValid) => {
-            //             if (bcryptErr) {
-            //                 return serverErrorMsg(res)
-            //             } else if (!isPasswordValid) {
-            //                 return returnData(res, 401, ERROR_MESSAGES.ERROR.INVALIDPASSWORD)
-            //             } else {
-            //                 const userAgent = req.headers['user-agent'];
-            //                 const device = userAgent.includes('Mobile') ? 'Mobile' : userAgent.includes('Tablet') ? 'Tablet' : 'Desktop';
-            //                 const ip = req.connection.remoteAddress;
-
-            //                 const browser = extractBrowserFromUserAgent(userAgent);
-            //                 // const logQuery = authQueries.userlogindataQuery;
-            //                 const logValues = [user.userId, ip, device, browser, presenttimestamp];
-
-            //                 const userDataString = JSON.stringify({ email: user.email, roleId: user.userRole });
-
-            //                 const encryptedData = encryptData(userDataString);
-
-            //                 var token = jwt.sign(
-            //                     { encryptedData }, ENVDATA.jwtsecretkey, { expiresIn: ENVDATA.accesstokenexpiry });
-
-            //                 var refereshtoken = jwt.sign(
-            //                     { encryptedData }, ENVDATA.jwtsecretkey, { expiresIn: ENVDATA.refreshtokenexpiry });
-
-            //                 const isUserMetaDataSql = authQueries.isMetadataQuery
-            //                 db.query(isUserMetaDataSql, [user.userId], async (err, result) => {
-            //                     if (err) {
-            //                         return serverErrorMsg(res)
-            //                     } else {
-            //                         const metaQuery = result.length > 0 ? authQueries.updateMetaDataQuery : authQueries.insertMetadataQuery
-            //                         const metaValues = result.length > 0 ? [refereshtoken, presenttimestamp, 0, 0, user.userId] : [user.userId, refereshtoken, presenttimestamp, presenttimestamp, 0, 0]
-            //                         db.query(`${authQueries.userlogindataQuery};${metaQuery}`, [...logValues, ...metaValues], (logErr) => {
-            //                             if (logErr) {
-            //                                 return returnData(res, 500, ERROR_MESSAGES.ERROR.LOGIN)
-            //                             } else {
-            //                                 let data = { token: token, refreshtoken: refereshtoken, email: user.email, roleId: user.userRole, userId: user.userId }
-            //                                 return returnData(res, 200, ERROR_MESSAGES.SUCCESS.LOGIN, data)
-            //                             }
-            //                         });
-            //                     }
-            //                 })
-            //             }
-            //         });
-            //     }
-            // });
         } else {
             return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNAMEPASSWORD)
         }
@@ -343,14 +291,15 @@ module.exports.resetpassword = async (req, res) => {
          * else throw error
          */
         if (newpassword == confirmpassword) {
+
+            // checking the token is expired or not
+            let data = await jwt.verify(token, ENVDATA.jwtsecretkey);
+            let isUser = JSON.parse(decryptData(data.encryptedData))
             // hashing the password to store that in db
             bcrypt.hash(newpassword, 9, async (err, hash) => {
                 if (err) {
                     return serverErrorMsg(res)
                 }
-                // checking the token is expired or not
-                let data = await jwt.verify(token, ENVDATA.jwtsecretkey);
-                let isUser = JSON.parse(decryptData(data.encryptedData))
 
                 // executing the query for resetting the password
                 await mySQLInstance.executeQuery(authQueries.resetPassSql, [hash, presenttimestamp, isUser.userId]).then(resukt => {
@@ -363,6 +312,7 @@ module.exports.resetpassword = async (req, res) => {
             return returnData(res, 409, ERROR_MESSAGES.ERROR.NEWANDCONFIRM)
         }
     } catch (err) {
+        console.log("🚀 ~ module.exports.resetpassword= ~ err:", err)
         return returnData(res, 401, ERROR_MESSAGES.ERROR.RESETTOKENEXPIRED)
     }
 }
@@ -689,13 +639,11 @@ const generateSessionId = () => {
 
 module.exports.generateQRCode = async (req, res) => {
     try {
-        console.log("ENVDATA.jwtsecretkey", ENVDATA.jwtsecretkey)
+        // console.log("ENVDATA.jwtsecretkey", ENVDATA.jwtsecretkey)
 
         let sessionId = generateSessionId()
 
         sessions[sessionId] = { verified: false, timestamp: presenttimestamp };
-
-        console.log("🚀 ~ module.exports.generateQRCode= ~ sessions:", sessions)
 
         let data = {
             jwtkey: ENVDATA.jwtsecretkey,
@@ -724,20 +672,14 @@ module.exports.generateQRCode = async (req, res) => {
 
 module.exports.verifyQrCode = async (req, res, next) => {
     const { qrcode, userId, seesionId } = req.body
-    // console.log("🚀 ~ module.exports.verifyQrCode= ~ userId:", userId)
-    // console.log("🚀 ~ module.exports.verifyQrCode= ~ qrcode:", qrcode)
+
     try {
 
         let data = JSON.parse(decryptData(qrcode))
-        // console.log("🚀 ~ module.exports.verifyQrCode= ~ data:", data.sessionId)
         const session = sessions[data.sessionId]
-        // console.log("🚀 ~ module.exports.verifyQrCode= ~ sessions:", sessions)
-        // console.log("🚀 ~ module.exports.verifyQrCode= ~ session:", session)
-        // console.log("🚀 ~ module.exports.verifyQrCode= ~ session:", session)
-        // if (session) {
+
         if (userId) {
             await mySQLInstance.executeQuery(authQueries.getUserData, [userId]).then((result) => {
-                // console.log("🚀 ~ mySQLInstance.executeQuery ~ result:", result)
                 let user = result[0]
                 // console.log("🚀 ~ awaitmySQLInstance.executeQuery ~ user:", user)
                 const userDataString = JSON.stringify({ email: user.email, roleId: user.userRole });
@@ -757,17 +699,12 @@ module.exports.verifyQrCode = async (req, res, next) => {
                 return returnData(res, 200, ERROR_MESSAGES.SUCCESS.LOGIN)
 
             }).catch(err => {
-                console.log("🚀 ~ mySQLInstance.executeQuery ~ err:", err)
+                // console.log("🚀 ~ mySQLInstance.executeQuery ~ err:", err)
                 return serverErrorMsg()
             })
         } else {
             return serverErrorMsg()
         }
-
-        // }
-
-        // let _data = { token: token, refreshtoken: refereshtoken, email: user.email, roleId: user.userRole, userId: user.userId }
-
     } catch (err) {
         return serverErrorMsg()
     }

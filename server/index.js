@@ -14,7 +14,7 @@ app.use(express.json())
 app.use(ROUTES.AUTH_ROUTE)
 app.use(ROUTES.USER_ROUTE)
 app.use(ROUTES.ENV_ROUTE)
-
+// "10.20.121.6",
 server.listen(ENVDATA.baseUrl, () => {
     console.log("ENVDATA.baseUrl", ENVDATA.baseUrl);
 })

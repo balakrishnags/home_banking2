@@ -42,11 +42,14 @@ export const DataDetails = (props) => {
                                 {/* <div className="col-md-6">
                                     <p className='mb-2'><span className='text-capitalize'>Total Payment</span> Amount : <strong>{detail?.totalPaymentAmount || ""}</strong></p>
                                 </div> */}
-                                <div className="col-md-12">
+                                <div className="col-md-6">
+                                    <p className='mb-2'><span className='text-capitalize'>Paid</span> Amount : <strong>{detail?.totalPaymentAmount}</strong></p>
+                                </div>
+                                <div className="col-md-6">
                                     <p className='mb-2'><span className='text-capitalize'>Pending</span> Amount : <strong>{detail?.pendingAmount}</strong></p>
                                 </div>
                                 <div className="col-md-6">
-                                    <p className='mb-2'><span className='text-capitalize'>Payment</span> Status : <strong>{detail?.paymentStatus === 0 ? "Payment Pending" : (detail?.paymentStatus === 1 ? "Paid/Completed" : "Partial Payment")}</strong></p>
+                                    <p className='mb-2'><span className='text-capitalize'>Payment</span> Status : <strong>{detail?.paymentStatus === 0 ? "Payment Pending" : (detail?.paymentStatus === 1 ? "Paid/Completed" : (Math.sign(detail?.pendingAmount) == 1 ? "Partial Payment" : "Excessive Payment"))}</strong></p>
                                 </div>
                             </div>
                         </div>

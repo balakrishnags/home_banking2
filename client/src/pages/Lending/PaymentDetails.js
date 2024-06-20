@@ -30,7 +30,6 @@ export const PaymentDetails = (props) => {
     const getPaymentDetails = async () => {
         let response = await getRequest(`${configUrl.getPaymentDetails}${userId}/${paymentType === "borrow" ? detail?.borrowId : detail?.lendId}/${paymentType}`)
         setPaymentList(response?.data?.data?.paymentData || [])
-        console.log("🚀 ~ getPaymentDetails ~ response:", response?.data?.data)
         setPaymentStatus(response?.data?.data?.paymentStatus)
     }
 

@@ -72,4 +72,15 @@ module.exports = {
             GET_ENV_DATA: "/envdata/list/:envtype",
         }
     },
+    DATA_TABLES: {
+        USERS: "users",
+        CREDIT_DATA: "creditdata",
+        DEBIT_DATA: "debitdata",
+        LENDING_DATA: "lendigdata",
+        BORROW_DATA: "borrowingdata",
+        PAYMENT_DATA: "paymenthistory",
+        META_DATA: "metadata",
+        USERLOG_DATA: "userlogdata",
+        ROLE: "role",
+    }
 }

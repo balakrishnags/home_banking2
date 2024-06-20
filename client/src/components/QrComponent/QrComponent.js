@@ -7,6 +7,7 @@ import { setAccessToken, setIsAuth, setScannerModal, setSessionScannerId, setSna
 import { RouteStrings } from '../../utils/common';
 import { QrScanner } from '@yudiel/react-qr-scanner';
 import { store } from '../../store/store';
+import { ENVDATA } from '../../Conflict/Conflct';
 
 export const QrComponent = (props) => {
     const { scannerView } = props
@@ -19,7 +20,7 @@ export const QrComponent = (props) => {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        const eventSource = new EventSource(`http://localhost:8081/sse/verifyQrscan`);
+        const eventSource = new EventSource(`${ENVDATA.baseUrl}/sse/verifyQrscan`);
 
         eventSource.onmessage = (event) => {
             let _sessionId = store.getState().UIStore.sessionScanId

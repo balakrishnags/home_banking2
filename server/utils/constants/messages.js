@@ -39,7 +39,8 @@ const ERROR_MESSAGES = Object.freeze({
         NEWANDCONFIRM: "New password and Confirm password should be same",
         INVALIDCURRENTPASSWORD: "Old password is not valid",
         RESETTOKENEXPIRED: "Reset Token expired",
-        INVALIDCURRENTPASS: "Invalid Current Password"
+        INVALIDCURRENTPASS: "Invalid Current Password",
+        TOKEN_REQUIERD: "Token is required"
     }
 })
 

@@ -10,7 +10,7 @@ module.exports.createrole = async (req, res) => {
     let _roleName = roleName.toLowerCase().trim()
     if (roleName) {
         try {
-            let checkRole = `SELECT roleName,status FROM role WHERE roleName LIKE ?`
+            let checkRole = userQueries.isRoleNameExists
 
             db.query(checkRole, [_roleName], (err, result) => {
                 if (err) {
@@ -20,7 +20,7 @@ module.exports.createrole = async (req, res) => {
                     let _result = result.filter(item => item.status === 0)
                     _result = _result.map(item => item.roleName.toLowerCase())
                     if (_result.includes(_roleName)) {
-                        const rolesql = `UPDATE role SET status=1,updatedDate=? WHERE roleName=?`;
+                        const rolesql = userQueries.reactivateRole;
                         db.query(rolesql, [presenttimestamp, _roleName], (err, result) => {
                             if (err) {
                                 return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
@@ -35,7 +35,7 @@ module.exports.createrole = async (req, res) => {
                         // return res.status(409).json({ status: 409, error: 'Role name exists' });
                     }
                 } else {
-                    const rolesql = 'INSERT INTO role (roleName, featurePermissions,createdDate,updatedDate,status) VALUES (?,?,?,?,?)';
+                    const rolesql = userQueries.addNewRole;
                     const values = [_roleName, featurePermissions, presenttimestamp, presenttimestamp, 1];
                     db.query(rolesql, values, (err, result) => {
                         if (err) {
@@ -68,7 +68,7 @@ module.exports.updaterole = async (req, res) => {
         const { roleId } = req.params
         let _roleName = roleName.toLowerCase().trim()
         try {
-            let checkRole = `SELECT roleName, roleId FROM role WHERE roleName LIKE ? AND roleId <> ? AND status=1`
+            let checkRole = userQueries.isRoleNameExistsOtherthanId;
 
             db.query(checkRole, [_roleName, roleId], (err, result) => {
                 if (err) {
@@ -78,7 +78,7 @@ module.exports.updaterole = async (req, res) => {
                     return returnData(res, 409, ERROR_MESSAGES.ERROR.ROLENAMEEXISTS)
                     // return res.status(409).json({ status: 409, error: 'Role name exists' });
                 } else {
-                    const rolesql = `UPDATE role SET roleName=?, featurePermissions=?,updatedDate=? WHERE roleId=?`;
+                    const rolesql = userQueries.updateRole;
                     db.query(rolesql, [_roleName, featurePermissions, presenttimestamp, roleId], (err, result) => {
                         if (err) {
                             // console.log("🚀 ~ file: userservice.js:105 ~ db.query ~ err:", err)
@@ -94,37 +94,26 @@ module.exports.updaterole = async (req, res) => {
         } catch (err) {
             // console.error('Error inserting user data:', err);
             return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-            // return res.status(500).json({ status: 500, error: 'Internal Server Error====>' });
 
         } finally { }
     } else {
         return returnData(res, 400, ERROR_MESSAGES.ERROR.ROLENAMEREQUIRED)
-        // res.status(400).send({
-        //     status: 400,
-        //     error: "Role name Required"
-        // })
     }
 }
 
 // role get Api
 module.exports.getrolelist = async (req, res) => {
     try {
-        let checkRole = `SELECT * FROM role WHERE status=1`
-
-        db.query(checkRole, (err, result) => {
+        db.query(userQueries.getRoleList, (err, result) => {
             if (err) {
                 return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
-                // return res.status(500).json({ status: 500, error: 'Internal Server Error' });
             } else if (result?.length < 0) {
                 return returnData(res, 404, ERROR_MESSAGES.ERROR.NODATAFOUND)
-                // return res.status(404).json({ status: 409, error: 'No Data Found' });
             } else {
                 return returnData(res, 200, ERROR_MESSAGES.SUCCESS.DATAFOUND, result)
-                // return res.status(200).json({ status: 200, message: 'Data Found', data: result });
             }
         })
     } catch (err) {
-        console.error('Error inserting user data:', err);
         return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
     }
 
@@ -134,14 +123,12 @@ module.exports.getrolelist = async (req, res) => {
 module.exports.deleterole = async (req, res) => {
     try {
         const { roleId } = req.params
-        let checkRole = `UPDATE role SET status=0, updatedDate=? WHERE roleId = ?`
 
-        db.query(checkRole, [presenttimestamp, roleId], (err, result) => {
+        db.query(userQueries.deleteRole, [presenttimestamp, roleId], (err, result) => {
             if (err) {
                 return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
             }
             return returnData(res, 200, ERROR_MESSAGES.SUCCESS.DATADELETED)
-            // res.status(200).json({ status: 200, error: 'Role Deleted Successfully' });
         })
     } catch (err) {
         return returnData(res, 500, ERROR_MESSAGES.ERROR.SERVER)
@@ -154,42 +141,39 @@ module.exports.addCreditDebit = async (req, res) => {
         const { userId, description, creditDate, creditAmount, type } = req.body
 
         // checking the user query
-        mySQLInstance.executeQuery(userQueries.isUser, [userId]).then(result1 => {
-            if (result1.length < 1) {
-                return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
-            } else if (type) {
-                // common function to execute query
-                const addMoneyDetail = (sql, values, msg) => {
-                    // executing the adding debit credit query
-                    mySQLInstance.executeQuery(sql, values).then(result => {
-                        return returnData(res, 201, `${msg} ${ERROR_MESSAGES.SUCCESS.DATADDED}`)
-                    }).catch(err => {
-                        return serverErrorMsg(res)
-                    })
-                }
-
-                if (type === "credit") {
-                    const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
-                    addMoneyDetail(userQueries.insertCreditQuery, values, "Credit")
-                } else if (type === "debit") {
-                    const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
-                    addMoneyDetail(userQueries.insertDebitQuery, values, "Debit")
-                } else if (type === "lending") {
-                    const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
-                    addMoneyDetail(userQueries.insertLendingQuery, values, "Lending")
-                } else if (type === "borrow") {
-                    const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
-                    addMoneyDetail(userQueries.insertBorrowQuery, values, "Borrowing")
-                } else {
-                    return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
-                }
-            } else {
-                return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEREQUIRED)
+        let result1 = await mySQLInstance.executeQuery(userQueries.isUser, [userId])
+        // .then(result1 => {
+        if (result1.length < 1) {
+            return returnData(res, 404, ERROR_MESSAGES.ERROR.USERNOTFOUND)
+        } else if (type) {
+            // common function to execute query
+            const addMoneyDetail = async (sql, values, msg) => {
+                let result = await mySQLInstance.executeQuery(sql, values)
+                return returnData(res, 201, `${msg} ${ERROR_MESSAGES.SUCCESS.DATADDED}`)
             }
 
-        }).catch(err => {
-            return serverErrorMsg(res)
-        })
+            if (type === "credit") {
+                const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
+                addMoneyDetail(userQueries.insertCreditQuery, values, "Credit")
+            } else if (type === "debit") {
+                const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1];
+                addMoneyDetail(userQueries.insertDebitQuery, values, "Debit")
+            } else if (type === "lending") {
+                const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
+                addMoneyDetail(userQueries.insertLendingQuery, values, "Lending")
+            } else if (type === "borrow") {
+                const values = [userId, description, creditDate, creditAmount, presenttimestamp, presenttimestamp, 1, 0];
+                addMoneyDetail(userQueries.insertBorrowQuery, values, "Borrowing")
+            } else {
+                return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEUNDEFINED)
+            }
+        } else {
+            return returnData(res, 400, ERROR_MESSAGES.ERROR.TYPEREQUIRED)
+        }
+
+        // }).catch(err => {
+        //     return serverErrorMsg(res)
+        // })
         // db.query(userQueries.isUser, [userId], async (err, result1) => {
         //     if (err) {
         //         // console.error('Error inserting user data:', err);
@@ -906,8 +890,8 @@ module.exports.getChartdata = async (req, res) => {
                     //     totalCredit = _totalCredit[0]?.totalAmount || 0
                     //     totaldebit = _totaldebit[0]?.totalAmount || 0
                     // }
-                    let totalCredit = result[0].reduce((sum, entry) => sum + entry.totalAmount, 0)
-                    let totaldebit = result[1].reduce((sum, entry) => sum + entry.totalAmount, 0)
+                    let totalCredit = result[0].reduce((sum, entry) => sum + Number(entry.totalAmount || 0), 0)
+                    let totaldebit = result[1].reduce((sum, entry) => sum + Number(entry.totalAmount || 0), 0)
                     let data = {
                         // creditData: result[0], debitData: result[1], lendingData: result[2],
                         // totalUsers: result[2][0].totalUsers,

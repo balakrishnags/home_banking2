@@ -31,11 +31,37 @@ export const CommonCreditScreen = (props) => {
         getAvailableBalance()
     }, [])
 
-    // get userslist
+    // get expenditure list
     const getCredits = async () => {
         let response = await getRequest(`${configUrl.getcreditdebit}${type}/${userDetail.userId}`)
         setCreditList(response?.data?.data || [])
         setFilterCreditList(response?.data?.data || [])
+        if (Object.keys(creditDetail).length > 0 && (type === "lending" || type === "borrow")) {
+            let responsedata = response?.data?.data || []
+            let data = {};
+            if (type === "lending") {
+                let _data = responsedata.filter(item => item.lendId === creditDetail?.creditId)
+                _data = _data?.[0] || {}
+                data = {
+                    ..._data,
+                    creditId: _data.lendId,
+                    creditDate: _data.lendingDate,
+                    creditAmount: _data.lendingAmount,
+                    description: _data.description
+                }
+            } else if (type === "borrow") {
+                let _data = responsedata.filter(item => item.borrowId === creditDetail?.creditId)
+                _data = _data?.[0] || {}
+                data = {
+                    ..._data,
+                    creditId: _data.borrowId,
+                    creditDate: _data.borrowDate,
+                    creditAmount: _data.borrowAmount,
+                    description: _data.description
+                }
+            }
+            setCreditDetail(data)
+        }
     }
 
     const getAvailableBalance = async () => {
@@ -214,7 +240,6 @@ export const CommonCreditScreen = (props) => {
     useEffect(() => {
         if (selectedFilter === 'date') {
             const filteredData = filterDataByDate(creditList, filterDate.start, filterDate.end, type)
-            console.log("🚀 ~ useEffect ~ filteredData:", filteredData)
             setFilterCreditList(filteredData)
         }
     }, [filterDate])
